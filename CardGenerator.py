@@ -618,12 +618,12 @@ class MonsterCardLayout(CardLayout):
         # Attributes
         # TODO: Handle list attributes
         text = ""
-        for heading, body in self.attributes.items():
+        for heading, body in (self.attributes or {}).items():
             text += "<b>{}:</b> {}<br/>".format(heading, body)
         self.elements.append(Paragraph(text, self.fonts.paragraph_styles["text"]))
 
         # Abilities
-        for heading, body in self.abilities.items():
+        for heading, body in (self.abilities or {}).items():
             paragraph = Paragraph("<i>{}:</i> {}".format(heading, body), self.fonts.paragraph_styles["text"])
             self.elements.append(paragraph)
 
@@ -636,7 +636,7 @@ class MonsterCardLayout(CardLayout):
         self.elements.append(Paragraph("ACTIONS", self.fonts.paragraph_styles["action_title"]))
 
 
-        for heading, body in self.actions.items():
+        for heading, body in (self.actions or {}).items():
             paragraph = Paragraph("<i><b>{}:</b></i> {}".format(heading, body), self.fonts.paragraph_styles["text"])
             self.elements.append(paragraph)
 
