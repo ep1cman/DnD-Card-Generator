@@ -46,6 +46,8 @@ Common Issues:
  - Entries that include a `:` must be surrounded by quotes `"` e.g: ``source: "System Reference Document: Page 315"``
  - The fields are case sensitive, make sure there are no capital letters. e.g ``title`` not ``Title``
 
+You can add formatting to any of the fields that generate text using reportlab's paragraph XML markup tags. Documentation for this can be found in chapter 6.2 of the [reportlab user guide](https://www.reportlab.com/docs/reportlab-userguide.pdf).
+
 ## Monster Cards
 ![Example Monster Card](docs/monster.png)
 
