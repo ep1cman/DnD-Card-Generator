@@ -1,3 +1,10 @@
+# Non-Free fonts
+fonts/Modesto*
+images/
+*.yaml
+!example/*.yaml
+cards.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

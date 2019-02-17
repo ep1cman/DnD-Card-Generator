@@ -1,0 +1,25 @@
+- title: Goblin
+  subtitle: Small humanoid (goblinoid), neutral evil
+  artist: Public Domain
+  image_path: example/Goblin.png
+  armor_class: 15 (Leather armor, shield)
+  max_hit_points: 7 (2d6)
+  speed: 30 ft.
+  strength: 8 (-1)
+  dexterity: 14 (+2)
+  constitution: 10 (+0)
+  intelligence: 10 (+0)
+  wisdom: 8 (-1)
+  charisma: 8 (-1)
+  challenge_rating: 1/4
+  experience_points: 50
+  source: "System Reference Document: Page 315"
+  attributes:
+    Skills: Stealth +6
+    Senses: darkvision 60ft., passive Perception 9
+    Languages: Common, Goblin
+  abilities:
+    Nimble Escape: The goblin can take the Disengage or Hide action as a bonus action on each of its turns.
+  actions:
+    Scimitar: +4, 5 ft., 5 (1d6 + 2) slashing damage.
+    Shortbow: +4, range 80/320 ft., 5 (1d6 + 2) piercing damage.
