@@ -184,7 +184,8 @@ class AccurateFonts(Fonts):
             alignment=TA_CENTER,
         ))
 
-
+# Draws a line across the frame, unless it is at the top of the frame, in which
+# case nothing is drawn
 class LineDivider(Flowable):
     def __init__(self, xoffset=0, width=None, fill_color="red",
                  line_height=0.25*mm, spacing=1*mm):
@@ -195,15 +196,26 @@ class LineDivider(Flowable):
         self.line_height = line_height
         self.height = self.line_height + self.spacing
 
+    def _at_top(self):
+        at_top = False
+        frame = getattr(self,'_frame',None)
+        if frame: 
+            at_top = getattr(frame,'_atTop',None)
+        return at_top
+
     def wrap(self, *args):
-        return (self.width, self.height)
+        if self._at_top():
+            return (0,0)
+        else:
+            return (self.width, self.height)
 
     def draw(self):
-        canvas = self.canv
-        canvas.setFillColor(self.fill_color)
-        canvas.setFillColor("red")
-        canvas.rect(self.xoffset, 0,
-                    self.width, self.line_height, stroke=0, fill=1)
+        if not self._at_top():
+            canvas = self.canv
+            canvas.setFillColor(self.fill_color)
+            canvas.setFillColor("red")
+            canvas.rect(self.xoffset, 0,
+                        self.width, self.line_height, stroke=0, fill=1)
 
 
 class Orientation(Enum):
@@ -296,7 +308,6 @@ class CardLayout(ABC):
         frames = iter(self.frames)
         try:
             current_frame = next(frames)
-            first_element = True
         except StopIteration:
             return
 
@@ -304,20 +315,16 @@ class CardLayout(ABC):
         while len(self.elements) > 0:
             element = self.elements[0]
             try:
-                if not (first_element and type(element) == LineDivider):
-                    result = current_frame.add(element, canvas)
-                    #current_frame.drawBoundary(canvas)
-                    # Could not draw into current frame
-                    if result == 0:
-                        raise LayoutError()
-                if first_element:
-                    first_element = False
+                result = current_frame.add(element, canvas)
+                #current_frame.drawBoundary(canvas)
+                # Could not draw into current frame
+                if result == 0:
+                    raise LayoutError()
                 del self.elements[0]
             # Frame is full, get next frame
             except LayoutError:
                 try:
                     current_frame = next(frames)
-                    first_element = True
                 # No more frames
                 except StopIteration:
                     break
