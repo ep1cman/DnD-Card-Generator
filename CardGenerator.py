@@ -218,6 +218,39 @@ class LineDivider(Flowable):
                         self.width, self.line_height, stroke=0, fill=1)
 
 
+class KeepTogether(Flowable):
+    
+    def __init__(self, flowables):
+        self.flowables = flowables
+        self._available_height = None
+        self._available_width = None
+
+    def wrap(self, aW, aH):
+        self._available_width = aW
+        self._available_height = aH
+
+        height = 0
+        width = 0
+        for flowable in self.flowables:
+            w, h = flowable.wrap(aW, 0xffffffff)
+            height += flowable.getSpaceBefore()
+            height += h
+            height += flowable.getSpaceAfter()
+            if w > width:
+                width = w
+        return width, height
+
+    def drawOn(self, canvas, x, y, _sW=0):
+        y -= self.flowables[0].getSpaceBefore()
+        for flowable in self.flowables[::-1]:
+            y += flowable.getSpaceBefore()
+            width, height = flowable.wrap(self._available_width, self._available_height)
+            flowable.drawOn(canvas, x, y, _sW=_sW)
+            y += height
+            y += flowable.getSpaceAfter()
+            self._available_height -= flowable.getSpaceBefore() + height + flowable.getSpaceBefore()
+
+
 class Orientation(Enum):
     NORMAL = 1
     TURN90 = 2
@@ -640,12 +673,16 @@ class MonsterCardLayout(CardLayout):
                                          fill_color=self.BORDER_COLOR))
 
         # Actions
-        self.elements.append(Paragraph("ACTIONS", self.fonts.paragraph_styles["action_title"]))
-
-
+        title = Paragraph("ACTIONS", self.fonts.paragraph_styles["action_title"])
+        first_action = True
         for heading, body in (self.actions or {}).items():
             paragraph = Paragraph("<i><b>{}:</b></i> {}".format(heading, body), self.fonts.paragraph_styles["text"])
-            self.elements.append(paragraph)
+            if first_action:
+                element = KeepTogether([title, paragraph])
+                first_action=False
+            else:
+                element = paragraph
+            self.elements.append(element)
 
 
 class MonsterCardSmall(SmallCard, MonsterCardLayout):
