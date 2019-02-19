@@ -809,8 +809,8 @@ if __name__ == "__main__":
                 entry["experience_points"],
                 entry["source"],
                 entry["attributes"],
-                entry["abilities"],
-                entry["actions"],
+                entry.get("abilities", None),
+                entry.get("actions", None),
                 entry.get("reactions", None),
                 fonts=fonts
             )
