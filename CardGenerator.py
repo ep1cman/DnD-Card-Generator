@@ -590,8 +590,8 @@ class MonsterCardLayout(CardLayout):
     def __init__(self, title, subtitle, artist, image_path,
                  armor_class, max_hit_points, speed, strength, dexterity,
                  constitution, intelligence, wisdom, charisma, challenge_rating,
-                 experience_points, source, attributes=(), abilities=(),
-                 actions=(), *args, **kwargs):
+                 experience_points, source, attributes=None, abilities=None,
+                 actions=None, reactions=None, *args, **kwargs):
         super().__init__(title, subtitle, artist, image_path, *args, **kwargs)
 
         self.armor_class = armor_class
@@ -609,6 +609,7 @@ class MonsterCardLayout(CardLayout):
         self.attributes = attributes
         self.abilities = abilities
         self.actions = actions
+        self.reactions = reactions
 
         self.challenge_rating = challenge_rating
         if int(experience_points) < 0:
@@ -698,6 +699,22 @@ class MonsterCardLayout(CardLayout):
                 element = paragraph
             self.elements.append(element)
 
+        if self.reactions is not None:
+            # Divider 3
+            self.elements.append(LineDivider(width=line_width,
+                                            xoffset=-self.TEXT_MARGIN,
+                                            fill_color=self.BORDER_COLOR))
+
+            title = Paragraph("REACTIONS", self.fonts.paragraph_styles["action_title"])
+            first_reaction = True
+            for heading, body in (self.reactions or {}).items():
+                paragraph = Paragraph("<i><b>{}:</b></i> {}".format(heading, body), self.fonts.paragraph_styles["text"])
+                if first_reaction:
+                    element = KeepTogether([title, paragraph])
+                    first_reaction=False
+                else:
+                    element = paragraph
+                self.elements.append(element)
 
 class MonsterCardSmall(SmallCard, MonsterCardLayout):
     def __init__(self, *args, **kwargs):       
@@ -794,6 +811,7 @@ if __name__ == "__main__":
                 entry["attributes"],
                 entry["abilities"],
                 entry["actions"],
+                entry.get("reactions", None),
                 fonts=fonts
             )
 
