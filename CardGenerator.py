@@ -297,7 +297,7 @@ class CardLayout(ABC):
     BASE_WIDTH = 63*mm
     BASE_HEIGHT = 89*mm
     BORDER_COLOR = "red"
-    TOP_LINE_BOTTOM = 80*mm
+    TITLE_BAR_HEIGHT = 4.8*mm
 
     # These must be set by sub classes
     WIDTH = None
@@ -453,21 +453,20 @@ class CardLayout(ABC):
          # Title
         canvas.setFillColor("black")
         title_font_height = self.fonts.set_font(canvas, "title")
-        title_line_top = self.TOP_LINE_BOTTOM + self.STANDARD_BORDER
-        title_bar_height = (self.HEIGHT - self.BORDER_BACK[Border.TOP]) \
-                             - title_line_top
-        title_bottom = title_line_top + (title_bar_height-title_font_height)/2
+        title_line_bottom = self.HEIGHT - self.BORDER_BACK[Border.TOP] - self.TITLE_BAR_HEIGHT
+        title_bottom = title_line_bottom + (self.TITLE_BAR_HEIGHT-title_font_height)/2
         canvas.drawCentredString(self.WIDTH + self.BASE_WIDTH/2,
                                  title_bottom, self.title.upper())
 
-        # Subtitle    
+        # Subtitle
+        subtitle_line_bottom = title_line_bottom - self.STANDARD_BORDER
         canvas.setFillColor(self.BORDER_COLOR)
-        canvas.rect(self.WIDTH, self.TOP_LINE_BOTTOM, self.BASE_WIDTH,
+        canvas.rect(self.WIDTH, subtitle_line_bottom, self.BASE_WIDTH,
                self.STANDARD_BORDER, stroke=0, fill=1)
 
         canvas.setFillColor("white")
         subtitle_font_height = self.fonts.set_font(canvas, "subtitle")
-        subtitle_bottom = self.TOP_LINE_BOTTOM + (self.STANDARD_BORDER-subtitle_font_height)/2
+        subtitle_bottom = subtitle_line_bottom + (self.STANDARD_BORDER-subtitle_font_height)/2
         canvas.drawCentredString(self.WIDTH + self.BASE_WIDTH/2, subtitle_bottom, self.subtitle)
 
     def _draw_single_border(self, canvas, x, width, height): 
@@ -531,7 +530,7 @@ class SmallCard(CardLayout):
             self.WIDTH + self.BORDER_BACK[Border.LEFT],
             self.BORDER_BACK[Border.BOTTOM],
             self.BASE_WIDTH - self.BORDER_BACK[Border.LEFT] - self.BORDER_BACK[Border.RIGHT],
-            self.TOP_LINE_BOTTOM - self.BORDER_BACK[Border.BOTTOM],
+            self.HEIGHT - self.BORDER_BACK[Border.TOP] - self.TITLE_BAR_HEIGHT - self.STANDARD_BORDER - self.BORDER_BACK[Border.BOTTOM],
             leftPadding = self.TEXT_MARGIN,
             bottomPadding = self.TEXT_MARGIN,
             rightPadding = self.TEXT_MARGIN,
@@ -554,7 +553,7 @@ class LargeCard(CardLayout):
             self.WIDTH + self.BORDER_BACK[Border.LEFT],
             self.BORDER_BACK[Border.BOTTOM],
             self.BASE_WIDTH - self.BORDER_BACK[Border.LEFT] - self.STANDARD_BORDER/2,
-            self.TOP_LINE_BOTTOM - self.BORDER_BACK[Border.BOTTOM],
+            self.HEIGHT - self.BORDER_BACK[Border.TOP] - self.TITLE_BAR_HEIGHT - self.STANDARD_BORDER - self.BORDER_BACK[Border.BOTTOM],
             leftPadding = self.TEXT_MARGIN,
             bottomPadding = self.TEXT_MARGIN,
             rightPadding = self.TEXT_MARGIN,
