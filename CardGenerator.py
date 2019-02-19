@@ -348,6 +348,21 @@ class CardLayout(ABC):
         while len(self.elements) > 0:
             element = self.elements[0]
             try:
+                if type(element) == LineDivider:
+                    available_height = current_frame._y - current_frame._y1p - self.elements[1].getSpaceBefore()
+                    available_width = current_frame._getAvailableWidth()
+                    _, line_height = element.wrap(available_width, 0xffffffff)
+                    _, next_height = self.elements[1].wrap(available_width, 0xffffffff)
+
+                    # Dont draw it if it will be the last thing on the frame
+                    if available_height < line_height + next_height:
+                        try:
+                            current_frame = next(frames)
+                        except StopIteration:
+                            raise LayoutError()
+                        del self.elements[0]
+                        continue
+
                 result = current_frame.add(element, canvas)
                 #current_frame.drawBoundary(canvas)
                 # Could not draw into current frame
