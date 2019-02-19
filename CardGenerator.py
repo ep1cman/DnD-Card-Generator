@@ -613,7 +613,7 @@ class MonsterCardLayout(CardLayout):
         self.challenge_rating = challenge_rating
         if int(experience_points) < 0:
             raise ValueError("Experience points must be positive")
-        self.experience_points = int(experience_points)
+        self.experience_points = "{:,}".format(int(experience_points))
         self.source = source
 
     def _draw_back(self, canvas):
