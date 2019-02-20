@@ -3,6 +3,8 @@ A script to generate cards for Dungeons and Dragons in the style of the official
 
 At this time, only monster cards are supported
 
+<meta property="og:image"
+    content="https://raw.githubusercontent.com/ep1cman/DnD-Card-Generator/master/docs/monster.png" />
 ![Example Output](docs/monster.png)
 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/ep1cman)
