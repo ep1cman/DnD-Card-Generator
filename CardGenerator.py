@@ -976,7 +976,7 @@ if __name__ == "__main__":
 
     with open(args.input, "r") as stream:
         try:
-            entries = yaml.load(stream)
+            entries = yaml.load(stream, Loader=yaml.SafeLoader)
         except yaml.YAMLError as exc:
             print(exc)
             exit()
