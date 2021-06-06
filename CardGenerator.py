@@ -431,6 +431,19 @@ class CardLayout(ABC):
     def _draw_front(self, canvas):
         canvas.saveState()
 
+        # Draw red border
+        self._draw_single_border(canvas, 0, self.WIDTH, self.HEIGHT)
+
+        # Parchment background
+        self._draw_single_background(
+            canvas,
+            0,
+            self.BORDER_FRONT,
+            self.WIDTH,
+            self.HEIGHT,
+            self.front_orientation,
+        )
+
         # Set card orientation
         if self.front_orientation == Orientation.TURN90:
             canvas.rotate(90)
@@ -440,12 +453,6 @@ class CardLayout(ABC):
         else:
             width = self.WIDTH
             height = self.HEIGHT
-
-        # Draw red border
-        self._draw_single_border(canvas, 0, width, height)
-
-        # Parchment background
-        self._draw_single_background(canvas, 0, self.BORDER_FRONT, width, height)
 
         # D&D logo
         dnd_logo = svg2rlg("logo.svg")
@@ -554,33 +561,34 @@ class CardLayout(ABC):
 
         canvas.restoreState()
 
-    def _draw_single_background(self, canvas, x, margins, width, height):
+    def _draw_single_background(
+        self, canvas, x, margins, width, height, orientation=Orientation.NORMAL
+    ):
         canvas.saveState()
 
         clipping_mask = canvas.beginPath()
-        clipping_mask.roundRect(
-            x + margins[Border.LEFT],
-            margins[Border.BOTTOM],
-            width - margins[Border.RIGHT] - margins[Border.LEFT],
-            height - margins[Border.TOP] - margins[Border.BOTTOM],
-            self.BACKGROUND_CORNER_DIAMETER,
-        )
-        canvas.clipPath(clipping_mask, stroke=0, fill=0)
 
-        # get optimum background orientation
-        background_orientation = best_orientation(
-            self.background_image_path, width, height
-        )
-        if background_orientation == Orientation.TURN90:
-            canvas.rotate(90)
-            canvas.translate(0, -self.WIDTH * 2)
-            canvas.drawImage(
-                self.background_image_path, 0, 0, width=height, height=width, mask=None
+        if orientation == Orientation.TURN90:
+            clipping_mask.roundRect(
+                x + margins[Border.BOTTOM],
+                margins[Border.LEFT],
+                width - margins[Border.TOP] - margins[Border.BOTTOM],
+                height - margins[Border.RIGHT] - margins[Border.LEFT],
+                self.BACKGROUND_CORNER_DIAMETER,
             )
         else:
-            canvas.drawImage(
-                self.background_image_path, x, 0, width=width, height=height, mask=None
+            clipping_mask.roundRect(
+                x + margins[Border.LEFT],
+                margins[Border.BOTTOM],
+                width - margins[Border.RIGHT] - margins[Border.LEFT],
+                height - margins[Border.TOP] - margins[Border.BOTTOM],
+                self.BACKGROUND_CORNER_DIAMETER,
             )
+        canvas.clipPath(clipping_mask, stroke=0, fill=0)
+
+        canvas.drawImage(
+            self.background_image_path, x, 0, width=width, height=height, mask=None
+        )
 
         canvas.restoreState()
 
