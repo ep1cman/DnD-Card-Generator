@@ -635,7 +635,7 @@ class LargeCard(CardLayout):
     WIDTH = CardLayout.BASE_WIDTH * 2
     HEIGHT = CardLayout.BASE_HEIGHT
 
-    BORDER_FRONT = (3.5 * mm, 3.5 * mm, 7 * mm, 9 * mm)
+    BORDER_FRONT = (3.5 * mm, 3.5 * mm, 7 * mm, 7 * mm)
     BORDER_BACK = (4 * mm, 4 * mm, 8.5 * mm, 3 * mm)
 
     def __init__(self, *args, **kwargs):
