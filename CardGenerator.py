@@ -393,6 +393,12 @@ class CardLayout(ABC):
             element = self.elements[0]
             try:
                 if type(element) == LineDivider:
+                    
+                    # Don't place a Line Divider if there is nothing after it
+                    if len(self.elements) == 1:
+                        del self.elements[0]
+                        break;
+
                     available_height = (
                         current_frame._y
                         - current_frame._y1p
