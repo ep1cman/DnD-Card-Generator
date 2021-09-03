@@ -689,6 +689,10 @@ class LargeCard(CardLayout):
         )
 
 
+class EpicCard(LargeCard):
+    HEIGHT = CardLayout.BASE_WIDTH * 2
+
+
 class MonsterCardLayout(CardLayout):
 
     # These must be set by subclasses
@@ -906,6 +910,18 @@ class MonsterCardLarge(LargeCard, MonsterCardLayout):
         )
 
 
+class MonsterCardEpic(EpicCard, MonsterCardLayout):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.CHALLENGE_BOTTOM = (
+            self.BORDER_BACK[Border.BOTTOM] - self.fonts.styles["challenge"][1]
+        ) / 2
+        self.SOURCE_LOCATION = (
+            self.WIDTH * 1.5 + self.STANDARD_BORDER / 2,
+            self.CHALLENGE_BOTTOM,
+        )
+
+
 class CardGenerator(ABC):
 
     sizes = []  # Set by subclass
@@ -926,7 +942,7 @@ class CardGenerator(ABC):
 
 
 class MonsterCard(CardGenerator):
-    sizes = [MonsterCardSmall, MonsterCardLarge]
+    sizes = [MonsterCardSmall, MonsterCardLarge, MonsterCardEpic]
 
 
 if __name__ == "__main__":
