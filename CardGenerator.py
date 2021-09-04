@@ -711,6 +711,9 @@ class EpicCard(LargeCard):
         # Card is square, don't rotate it
         self.front_orientation = Orientation.NORMAL
 
+class SuperEpicCard(LargeCard):
+    HEIGHT = CardLayout.BASE_WIDTH * 3
+    BORDER_BACK = (4 * mm, 4 * mm, 6.5 * mm, 3 * mm)
 
 class MonsterCardLayout(CardLayout):
 
@@ -968,6 +971,8 @@ class MonsterCardEpic(EpicCard, MonsterCardLarge):
     pass
 
 
+class MonsterCardSuperEpic(SuperEpicCard, MonsterCardLarge):
+    pass
 
 
 class CardGenerator(ABC):
@@ -990,7 +995,7 @@ class CardGenerator(ABC):
 
 
 class MonsterCard(CardGenerator):
-    sizes = [MonsterCardSmall, MonsterCardLarge, MonsterCardEpic]
+    sizes = [MonsterCardSmall, MonsterCardLarge, MonsterCardEpic, MonsterCardSuperEpic]
 
 
 if __name__ == "__main__":
