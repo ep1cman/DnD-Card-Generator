@@ -993,6 +993,8 @@ class CardGenerator(ABC):
                 break
             except TemplateTooSmall:
                 pass
+        else:
+            print("Could not fit {}".format(self._args[0]))
 
 
 class MonsterCard(CardGenerator):
