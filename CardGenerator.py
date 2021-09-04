@@ -705,6 +705,7 @@ class LargeCard(CardLayout):
 
 class EpicCard(LargeCard):
     HEIGHT = CardLayout.BASE_WIDTH * 2
+    BORDER_BACK = (4 * mm, 4 * mm, 6.5 * mm, 3 * mm)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
