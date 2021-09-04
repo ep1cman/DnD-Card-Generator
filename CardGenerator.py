@@ -383,53 +383,49 @@ class CardLayout(ABC):
 
     def _draw_frames(self, canvas):
         frames = iter(self.frames)
-        try:
             current_frame = next(frames)
-        except StopIteration:
-            return
 
         # Draw the elements
         while len(self.elements) > 0:
-            element = self.elements[0]
-            try:
+            element = self.elements.pop(0)
+
                 if type(element) == LineDivider:
                     
                     # Don't place a Line Divider if there is nothing after it
-                    if len(self.elements) == 1:
-                        del self.elements[0]
+                if len(self.elements) == 0:
                         break;
 
+                # Caluclate how much space is left
                     available_height = (
                         current_frame._y
                         - current_frame._y1p
-                        - self.elements[1].getSpaceBefore()
+                    # - self.elements[0].getSpaceBefore()
                     )
                     available_width = current_frame._getAvailableWidth()
+
+                # Calculate how much heigh is required for the line and the next element
                     _, line_height = element.wrap(available_width, 0xFFFFFFFF)
-                    _, next_height = self.elements[1].wrap(available_width, 0xFFFFFFFF)
+                _, next_height = self.elements[0].wrap(available_width, 0xFFFFFFFF)
 
                     # Dont draw it if it will be the last thing on the frame
                     if available_height < line_height + next_height:
-                        try:
-                            current_frame = next(frames)
-                        except StopIteration:
-                            raise LayoutError()
-                        del self.elements[0]
                         continue
 
-                result = current_frame.add(element, canvas)
+            # DEBUG: Draw frame boundary
                 # current_frame.drawBoundary(canvas)
+
+
                 # Could not draw into current frame
+            result = current_frame.add(element, canvas)
                 if result == 0:
-                    raise LayoutError()
-                del self.elements[0]
-            # Frame is full, get next frame
-            except LayoutError:
+                # We couldn't draw the element, so put it back
+                self.elements.insert(0,element)
                 try:
                     current_frame = next(frames)
                 # No more frames
                 except StopIteration:
                     break
+
         # If there are undrawn elements, raise an error
         if len(self.elements) > 0:
             raise TemplateTooSmall("Template too small")
