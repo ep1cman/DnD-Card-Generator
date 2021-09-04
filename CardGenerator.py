@@ -712,9 +712,8 @@ class EpicCard(LargeCard):
         # Card is square, don't rotate it
         self.front_orientation = Orientation.NORMAL
 
-class SuperEpicCard(LargeCard):
+class SuperEpicCard(EpicCard):
     HEIGHT = CardLayout.BASE_WIDTH * 3
-    BORDER_BACK = (4 * mm, 4 * mm, 6.5 * mm, 3 * mm)
 
 class MonsterCardLayout(CardLayout):
 
