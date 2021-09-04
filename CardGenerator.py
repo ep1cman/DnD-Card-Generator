@@ -95,7 +95,16 @@ class FreeFonts(Fonts):
                 leading=self.styles["text"][1] * self.FONT_SCALE + 0.5 * mm,
                 spaceBefore=1 * mm,
             )
-        ),
+        )
+        self.paragraph_styles.add(
+            ParagraphStyle(
+                name="legendary_action",
+                fontName=self.styles["text"][0],
+                fontSize=self.styles["text"][1] * self.FONT_SCALE,
+                leading=self.styles["text"][1] * self.FONT_SCALE + 0.5 * mm,
+                spaceBefore=0,
+            )
+        )
         self.paragraph_styles.add(
             ParagraphStyle(
                 name="modifier",
@@ -183,7 +192,16 @@ class AccurateFonts(Fonts):
                 leading=self.styles["text"][1] * self.FONT_SCALE + 0.5 * mm,
                 spaceBefore=1 * mm,
             )
-        ),
+        )
+        self.paragraph_styles.add(
+            ParagraphStyle(
+                name="legendary_action",
+                fontName=self.styles["text"][0],
+                fontSize=self.styles["text"][1] * self.FONT_SCALE,
+                leading=self.styles["text"][1] * self.FONT_SCALE + 0.5 * mm,
+                spaceBefore=0,
+            )
+        )
         self.paragraph_styles.add(
             ParagraphStyle(
                 name="modifier",
@@ -722,6 +740,7 @@ class MonsterCardLayout(CardLayout):
         abilities=None,
         actions=None,
         reactions=None,
+        lengendary=None,
         *args,
         **kwargs
     ):
@@ -743,6 +762,7 @@ class MonsterCardLayout(CardLayout):
         self.abilities = abilities
         self.actions = actions
         self.reactions = reactions
+        self.legendary = lengendary
 
         self.challenge_rating = challenge_rating
         self.experience_points = experience_points
@@ -891,6 +911,39 @@ class MonsterCardLayout(CardLayout):
                     element = paragraph
                 self.elements.append(element)
 
+        if self.legendary is not None:
+            self.elements.append(
+                LineDivider(
+                    width=line_width,
+                    xoffset=-self.TEXT_MARGIN,
+                    fill_color=self.BORDER_COLOR,
+                )
+            )
+
+            title = Paragraph("LEGENDARY ACTIONS", self.fonts.paragraph_styles["action_title"])
+            first_legnedary = True
+            for entry in (self.legendary or []):
+                if type(entry) == str:
+                    paragraph = Paragraph(
+                        entry,
+                        self.fonts.paragraph_styles["text"],
+                    )
+                elif type(entry) == dict:
+                    paragraph = Paragraph(
+                        "<i><b>{}:</b></i> {}".format(*list(entry.items())[0]),
+                        self.fonts.paragraph_styles["legendary_action"],
+                    )
+                else:
+                    TypeError('Legendary action cannot be type "{}"'.format(type(entry)))
+                
+                
+                if first_legnedary:
+                    element = KeepTogether([title, paragraph])
+                    first_legnedary = False
+                else:
+                    element = paragraph
+                self.elements.append(element)
+
 
 class MonsterCardSmall(SmallCard, MonsterCardLayout):
     def __init__(self, *args, **kwargs):
@@ -1025,6 +1078,7 @@ if __name__ == "__main__":
                 entry.get("abilities", None),
                 entry.get("actions", None),
                 entry.get("reactions", None),
+                entry.get("legendary", None),
                 fonts=fonts,
             )
 
