@@ -838,7 +838,7 @@ class MonsterCardLayout(CardLayout):
         # Abilities
         for heading, body in (self.abilities or {}).items():
             paragraph = Paragraph(
-                "<i>{}:</i> {}".format(heading, body),
+                "<i><b>{}:</b></i> {}".format(heading, body),
                 self.fonts.paragraph_styles["text"],
             )
             self.elements.append(paragraph)
