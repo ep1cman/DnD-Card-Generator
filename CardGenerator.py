@@ -401,41 +401,41 @@ class CardLayout(ABC):
 
     def _draw_frames(self, canvas):
         frames = iter(self.frames)
-            current_frame = next(frames)
+        current_frame = next(frames)
 
         # Draw the elements
         while len(self.elements) > 0:
             element = self.elements.pop(0)
 
-                if type(element) == LineDivider:
-                    
-                    # Don't place a Line Divider if there is nothing after it
+            if type(element) == LineDivider:
+                
+                # Don't place a Line Divider if there is nothing after it
                 if len(self.elements) == 0:
-                        break;
+                    break;
 
                 # Caluclate how much space is left
-                    available_height = (
-                        current_frame._y
-                        - current_frame._y1p
+                available_height = (
+                    current_frame._y
+                    - current_frame._y1p
                     # - self.elements[0].getSpaceBefore()
-                    )
-                    available_width = current_frame._getAvailableWidth()
+                )
+                available_width = current_frame._getAvailableWidth()
 
                 # Calculate how much heigh is required for the line and the next element
-                    _, line_height = element.wrap(available_width, 0xFFFFFFFF)
+                _, line_height = element.wrap(available_width, 0xFFFFFFFF)
                 _, next_height = self.elements[0].wrap(available_width, 0xFFFFFFFF)
 
-                    # Dont draw it if it will be the last thing on the frame
-                    if available_height < line_height + next_height:
-                        continue
+                # Dont draw it if it will be the last thing on the frame
+                if available_height < line_height + next_height:
+                    continue
 
             # DEBUG: Draw frame boundary
-                # current_frame.drawBoundary(canvas)
+            # current_frame.drawBoundary(canvas)
 
 
-                # Could not draw into current frame
+            # Could not draw into current frame
             result = current_frame.add(element, canvas)
-                if result == 0:
+            if result == 0:
                 # We couldn't draw the element, so put it back
                 self.elements.insert(0,element)
                 try:
