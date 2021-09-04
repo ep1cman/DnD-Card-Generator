@@ -688,6 +688,11 @@ class LargeCard(CardLayout):
 class EpicCard(LargeCard):
     HEIGHT = CardLayout.BASE_WIDTH * 2
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Card is square, don't rotate it
+        self.front_orientation = Orientation.NORMAL
+
 
 class MonsterCardLayout(CardLayout):
 
