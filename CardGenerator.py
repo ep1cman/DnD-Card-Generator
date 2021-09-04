@@ -964,16 +964,10 @@ class MonsterCardLarge(LargeCard, MonsterCardLayout):
         )
 
 
-class MonsterCardEpic(EpicCard, MonsterCardLayout):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.CHALLENGE_BOTTOM = (
-            self.BORDER_BACK[Border.BOTTOM] - self.fonts.styles["challenge"][1]
-        ) / 2
-        self.SOURCE_LOCATION = (
-            self.WIDTH * 1.5 + self.STANDARD_BORDER / 2,
-            self.CHALLENGE_BOTTOM,
-        )
+class MonsterCardEpic(EpicCard, MonsterCardLarge):
+    pass
+
+
 
 
 class CardGenerator(ABC):
