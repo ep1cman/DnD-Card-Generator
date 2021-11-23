@@ -56,9 +56,9 @@ class FreeFonts(Fonts):
         "modifier_title": ("Universal Serif", 1.5 * mm, "black"),
     }
 
-    def set_font(self, canvas, section):
+    def set_font(self, canvas, section, custom_scale=1.0):
         canvas.setFont(
-            self.styles[section][0], self.styles[section][1] * self.FONT_SCALE
+            self.styles[section][0], self.styles[section][1] * self.FONT_SCALE * custom_scale
         )
         return self.styles[section][1]
 
@@ -147,9 +147,9 @@ class AccurateFonts(Fonts):
         "modifier_title": ("ModestoExpanded", 1.5 * mm, "black"),
     }
 
-    def set_font(self, canvas, section):
+    def set_font(self, canvas, section, custom_scale=1.0):
         canvas.setFont(
-            self.styles[section][0], self.styles[section][1] * self.FONT_SCALE
+            self.styles[section][0], self.styles[section][1] * self.FONT_SCALE * custom_scale
         )
         return self.styles[section][1]
 
@@ -532,8 +532,9 @@ class CardLayout(ABC):
         )
 
         # Title
+        custom_scale = min(1.0, 20 / len(self.title))
         canvas.setFillColor("black")
-        title_font_height = self.fonts.set_font(canvas, "title")
+        title_font_height = self.fonts.set_font(canvas, "title", custom_scale)
         title_line_bottom = (
             self.HEIGHT - self.BORDER_BACK[Border.TOP] - self.TITLE_BAR_HEIGHT
         )
