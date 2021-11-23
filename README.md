@@ -118,3 +118,4 @@ will need to put the following fonts into the `fonts` folder in TTF format:
  - The included fonts are TTF versions of:
     - [Scaly Sans](https://github.com/jonathonf/solbera-dnd-fonts) by Solbera, Ryrok and jonathonf
     - [Universal Sans](https://www.dafont.com/universal-serif.font) by Khiam Mincey
+ - All Wizards of the Coast content provided under terms of the Open Gaming License Version 1.0a.
