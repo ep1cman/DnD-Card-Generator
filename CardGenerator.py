@@ -3,6 +3,7 @@ import math
 import yaml
 import sys
 import argparse
+import pathlib
 
 from enum import Enum, IntEnum
 from abc import ABC
@@ -22,6 +23,10 @@ from reportlab.lib.fonts import addMapping
 from reportlab.platypus.doctemplate import LayoutError
 from svglib.svglib import svg2rlg
 
+
+ASSET_DIR = pathlib.Path(__file__).parent.resolve() / 'assets'
+
+
 # Returns the best orientation for the given image aspect ration
 def best_orientation(image_path, card_width, card_height):
     image = Image.open(image_path)
@@ -38,6 +43,7 @@ class Fonts(ABC):
     styles = {}
     # Scaling factor between the font size and its actual height in mm
     FONT_SCALE = None
+    FONT_DIR = ASSET_DIR / "fonts"
 
     def __init__(self):
         self._register_fonts()
@@ -113,19 +119,19 @@ class FreeFonts(Fonts):
 
     def _register_fonts(self):
         pdfmetrics.registerFont(
-            TTFont("Universal Serif", os.path.join("fonts", "Universal Serif.ttf"))
+            TTFont("Universal Serif", self.FONT_DIR / "Universal Serif.ttf")
         )
         pdfmetrics.registerFont(
-            TTFont("ScalySans", os.path.join("fonts", "ScalySans.ttf"))
+            TTFont("ScalySans", self.FONT_DIR / "ScalySans.ttf")
         )
         pdfmetrics.registerFont(
-            TTFont("ScalySansItalic", os.path.join("fonts", "ScalySans-Italic.ttf"))
+            TTFont("ScalySansItalic", self.FONT_DIR / "ScalySans-Italic.ttf")
         )
         pdfmetrics.registerFont(
-            TTFont("ScalySansBold", os.path.join("fonts", "ScalySans-Bold.ttf"))
+            TTFont("ScalySansBold", self.FONT_DIR / "ScalySans-Bold.ttf")
         )
         pdfmetrics.registerFont(
-            TTFont("ScalySansBoldItalic", os.path.join("fonts", "ScalySans-BoldItalic.ttf"))
+            TTFont("ScalySansBoldItalic", self.FONT_DIR / "ScalySans-BoldItalic.ttf")
         )
 
         addMapping("ScalySans", 0, 0, "ScalySans")  # normal
@@ -150,25 +156,25 @@ class AccurateFonts(Fonts):
     def _register_fonts(self):
         pdfmetrics.registerFont(
             TTFont(
-                "ModestoExpanded", os.path.join("fonts", "ModestoExpanded-Regular.ttf")
+                "ModestoExpanded", self.FONT_DIR / "ModestoExpanded-Regular.ttf"
             )
         )
         pdfmetrics.registerFont(
-            TTFont("ModestoTextLight", os.path.join("fonts", "ModestoText-Light.ttf"))
+            TTFont("ModestoTextLight", self.FONT_DIR / "ModestoText-Light.ttf")
         )
         pdfmetrics.registerFont(
             TTFont(
                 "ModestoTextLightItalic",
-                os.path.join("fonts", "ModestoText-LightItalic.ttf"),
+                self.FONT_DIR / "ModestoText-LightItalic.ttf",
             )
         )
         pdfmetrics.registerFont(
-            TTFont("ModestoTextBold", os.path.join("fonts", "ModestoText-Bold.ttf"))
+            TTFont("ModestoTextBold", self.FONT_DIR / "ModestoText-Bold.ttf")
         )
         pdfmetrics.registerFont(
             TTFont(
                 "ModestoTextBoldItalic",
-                os.path.join("fonts", "ModestoText-BoldItalic.ttf"),
+                self.FONT_DIR / "ModestoText-BoldItalic.ttf",
             )
         )
 
@@ -312,7 +318,7 @@ class CardLayout(ABC):
         subtitle,
         artist,
         image_path,
-        background="background.png",
+        background=ASSET_DIR / "background.png",
         border_color="red",
         fonts=FreeFonts(),
     ):
@@ -422,7 +428,7 @@ class CardLayout(ABC):
             height = self.HEIGHT
 
         # D&D logo
-        dnd_logo = svg2rlg("logo.svg")
+        dnd_logo = svg2rlg(ASSET_DIR / "logo.svg")
         if dnd_logo is not None:
             factor = self.LOGO_WIDTH / dnd_logo.width
             dnd_logo.width *= factor
