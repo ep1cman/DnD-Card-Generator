@@ -219,7 +219,6 @@ class LineDivider(Flowable):
         if not self._at_top():
             canvas = self.canv
             canvas.setFillColor(self.fill_color)
-            canvas.setFillColor("red")
             canvas.rect(self.xoffset, 0, self.width, self.line_height, stroke=0, fill=1)
 
 
@@ -324,6 +323,7 @@ class CardLayout(ABC):
     ):
         self.frames = []
         self.FRONT_MARGINS = tuple([x + 1 * mm for x in self.BORDER_FRONT])
+        self.BORDER_COLOR = border_color
 
         self.title = title
         self.subtitle = subtitle
@@ -1053,6 +1053,7 @@ if __name__ == "__main__":
                 entry.get("reactions", None),
                 entry.get("legendary", None),
                 fonts=fonts,
+                border_color=entry.get("color", "red"),
             )
 
         card.draw(canvas)
