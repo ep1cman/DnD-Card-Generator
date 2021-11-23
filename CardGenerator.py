@@ -1062,7 +1062,7 @@ if __name__ == "__main__":
                 entry["title"],
                 entry["subtitle"],
                 entry.get("artist", None),
-                entry["image_path"],
+                os.path.dirname(args.input) + "/" + entry["image_path"],
                 entry["armor_class"],
                 entry["max_hit_points"],
                 entry["speed"],
