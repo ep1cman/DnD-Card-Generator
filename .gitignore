@@ -4,6 +4,8 @@ images/
 *.yaml
 !example/*.yaml
 cards.pdf
+data/*
+!data/srd.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
