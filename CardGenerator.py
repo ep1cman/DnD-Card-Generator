@@ -34,59 +34,14 @@ def best_orientation(image_path, card_width, card_height):
 
 # TODO: Clean up the font object, it seems a bit crude
 # TODO: Also manage colours
-class Fonts(object):
+class Fonts(ABC):
     styles = {}
     # Scaling factor between the font size and its actual height in mm
     FONT_SCALE = None
 
     def __init__(self):
+        self._register_fonts()
         self.paragraph_styles = StyleSheet1()
-
-
-class FreeFonts(Fonts):
-    FONT_SCALE = 1.41
-
-    styles = {
-        "title": ("Universal Serif", 2.5 * mm, "black"),
-        "subtitle": ("ScalySans", 1.5 * mm, "white"),
-        "challenge": ("Universal Serif", 2.25 * mm, "black"),
-        "heading": ("ScalySansBold", 1.5 * mm, "black"),
-        "text": ("ScalySans", 1.5 * mm, "black"),
-        "artist": ("ScalySans", 1.25 * mm, "white"),
-        "modifier_title": ("Universal Serif", 1.5 * mm, "black"),
-    }
-
-    def set_font(self, canvas, section, custom_scale=1.0):
-        canvas.setFont(
-            self.styles[section][0], self.styles[section][1] * self.FONT_SCALE * custom_scale
-        )
-        return self.styles[section][1]
-
-    def __init__(self):
-        super().__init__()
-        pdfmetrics.registerFont(
-            TTFont("Universal Serif", os.path.join("fonts", "Universal Serif.ttf"))
-        )
-        pdfmetrics.registerFont(
-            TTFont("ScalySans", os.path.join("fonts", "ScalySans.ttf"))
-        )
-        pdfmetrics.registerFont(
-            TTFont("ScalySansItalic", os.path.join("fonts", "ScalySans-Italic.ttf"))
-        )
-        pdfmetrics.registerFont(
-            TTFont("ScalySansBold", os.path.join("fonts", "ScalySans-Bold.ttf"))
-        )
-        pdfmetrics.registerFont(
-            TTFont(
-                "ScalySansBoldItalic", os.path.join("fonts", "ScalySans-BoldItalic.ttf")
-            )
-        )
-
-        addMapping("ScalySans", 0, 0, "ScalySans")  # normal
-        addMapping("ScalySans", 0, 1, "ScalySansItalic")  # italic
-        addMapping("ScalySans", 1, 0, "ScalySansBold")  # bold
-        addMapping("ScalySans", 1, 1, "ScalySansBoldItalic")  # italic and bold
-
         self.paragraph_styles.add(
             ParagraphStyle(
                 name="text",
@@ -133,6 +88,51 @@ class FreeFonts(Fonts):
             )
         )
 
+    def set_font(self, canvas, section, custom_scale=1.0):
+        canvas.setFont(
+            self.styles[section][0], self.styles[section][1] * self.FONT_SCALE * custom_scale
+        )
+        return self.styles[section][1]
+
+    def _register_fonts(self):
+        raise NotImplemented
+
+
+class FreeFonts(Fonts):
+    FONT_SCALE = 1.41
+
+    styles = {
+        "title": ("Universal Serif", 2.5 * mm, "black"),
+        "subtitle": ("ScalySans", 1.5 * mm, "white"),
+        "challenge": ("Universal Serif", 2.25 * mm, "black"),
+        "heading": ("ScalySansBold", 1.5 * mm, "black"),
+        "text": ("ScalySans", 1.5 * mm, "black"),
+        "artist": ("ScalySans", 1.25 * mm, "white"),
+        "modifier_title": ("Universal Serif", 1.5 * mm, "black"),
+    }
+
+    def _register_fonts(self):
+        pdfmetrics.registerFont(
+            TTFont("Universal Serif", os.path.join("fonts", "Universal Serif.ttf"))
+        )
+        pdfmetrics.registerFont(
+            TTFont("ScalySans", os.path.join("fonts", "ScalySans.ttf"))
+        )
+        pdfmetrics.registerFont(
+            TTFont("ScalySansItalic", os.path.join("fonts", "ScalySans-Italic.ttf"))
+        )
+        pdfmetrics.registerFont(
+            TTFont("ScalySansBold", os.path.join("fonts", "ScalySans-Bold.ttf"))
+        )
+        pdfmetrics.registerFont(
+            TTFont("ScalySansBoldItalic", os.path.join("fonts", "ScalySans-BoldItalic.ttf"))
+        )
+
+        addMapping("ScalySans", 0, 0, "ScalySans")  # normal
+        addMapping("ScalySans", 0, 1, "ScalySansItalic")  # italic
+        addMapping("ScalySans", 1, 0, "ScalySansBold")  # bold
+        addMapping("ScalySans", 1, 1, "ScalySansBoldItalic")  # italic and bold
+
 
 class AccurateFonts(Fonts):
     FONT_SCALE = 1.41
@@ -147,14 +147,7 @@ class AccurateFonts(Fonts):
         "modifier_title": ("ModestoExpanded", 1.5 * mm, "black"),
     }
 
-    def set_font(self, canvas, section, custom_scale=1.0):
-        canvas.setFont(
-            self.styles[section][0], self.styles[section][1] * self.FONT_SCALE * custom_scale
-        )
-        return self.styles[section][1]
-
-    def __init__(self):
-        super().__init__()
+    def _register_fonts(self):
         pdfmetrics.registerFont(
             TTFont(
                 "ModestoExpanded", os.path.join("fonts", "ModestoExpanded-Regular.ttf")
@@ -183,52 +176,6 @@ class AccurateFonts(Fonts):
         addMapping("ModestoTextLight", 0, 1, "ModestoTextLightItalic")  # italic
         addMapping("ModestoTextLight", 1, 0, "ModestoTextBold")  # bold
         addMapping("ModestoTextLight", 1, 1, "ModestoTextBoldItalic")  # italic and bold
-
-        self.paragraph_styles.add(
-            ParagraphStyle(
-                name="text",
-                fontName=self.styles["text"][0],
-                fontSize=self.styles["text"][1] * self.FONT_SCALE,
-                leading=self.styles["text"][1] * self.FONT_SCALE + 0.5 * mm,
-                spaceBefore=1 * mm,
-            )
-        )
-        self.paragraph_styles.add(
-            ParagraphStyle(
-                name="legendary_action",
-                fontName=self.styles["text"][0],
-                fontSize=self.styles["text"][1] * self.FONT_SCALE,
-                leading=self.styles["text"][1] * self.FONT_SCALE + 0.5 * mm,
-                spaceBefore=0,
-            )
-        )
-        self.paragraph_styles.add(
-            ParagraphStyle(
-                name="modifier",
-                fontName=self.styles["text"][0],
-                fontSize=self.styles["text"][1] * self.FONT_SCALE,
-                leading=self.styles["text"][1] * self.FONT_SCALE + 0.5 * mm,
-                alignment=TA_CENTER,
-            )
-        )
-        self.paragraph_styles.add(
-            ParagraphStyle(
-                name="action_title",
-                fontName=self.styles["modifier_title"][0],
-                fontSize=self.styles["modifier_title"][1] * self.FONT_SCALE,
-                leading=self.styles["modifier_title"][1] * self.FONT_SCALE + 0.5 * mm,
-                spaceBefore=1 * mm,
-            )
-        )
-        self.paragraph_styles.add(
-            ParagraphStyle(
-                name="modifier_title",
-                fontName=self.styles["modifier_title"][0],
-                fontSize=self.styles["modifier_title"][1] * self.FONT_SCALE,
-                leading=self.styles["modifier_title"][1] * self.FONT_SCALE + 0.5 * mm,
-                alignment=TA_CENTER,
-            )
-        )
 
 
 # Draws a line across the frame, unless it is at the top of the frame, in which
