@@ -825,6 +825,8 @@ class MonsterCardLayout(CardLayout):
             self.wisdom,
             self.charisma,
         ]
+        # if modifiers are (int), e.g. 13, then automatically reformat as "13 (+1)"
+        modifiers = [(m if isinstance(m, str) else "%d (%+d)" % (m, math.floor((m-10)/2))) for m in modifiers]
         modifier_table_data = [
             [
                 Paragraph(a, self.fonts.paragraph_styles["modifier_title"])
