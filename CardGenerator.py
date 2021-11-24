@@ -302,7 +302,6 @@ class CardLayout(ABC):
     TEXT_MARGIN = 2 * mm
     BASE_WIDTH = 63 * mm
     BASE_HEIGHT = 89 * mm
-    BORDER_COLOR = "red"
     TITLE_BAR_HEIGHT = 4.8 * mm
 
     # These must be set by sub classes
@@ -323,13 +322,13 @@ class CardLayout(ABC):
     ):
         self.frames = []
         self.FRONT_MARGINS = tuple([x + 1 * mm for x in self.BORDER_FRONT])
-        self.BORDER_COLOR = border_color
 
         self.title = title
         self.subtitle = subtitle
         self.artist = artist
         self.fonts = fonts
         self.background_image_path = background
+        self.border_color = border_color
 
         self.front_image_path = os.path.abspath(image_path)
         # Figure out front orientation
@@ -500,7 +499,7 @@ class CardLayout(ABC):
 
         # Subtitle
         subtitle_line_bottom = title_line_bottom - self.STANDARD_BORDER
-        canvas.setFillColor(self.BORDER_COLOR)
+        canvas.setFillColor(self.border_color)
         canvas.rect(
             self.WIDTH,
             subtitle_line_bottom,
@@ -521,13 +520,13 @@ class CardLayout(ABC):
 
     def _draw_single_border(self, canvas, x, width, height):
         canvas.saveState()
-        if type(self.BORDER_COLOR) == str:
-            canvas.setFillColor(self.BORDER_COLOR)
+        if type(self.border_color) == str:
+            canvas.setFillColor(self.border_color)
         else:
             canvas.setFillColorRGB(
-                self.BORDER_COLOR[0] / 255,
-                self.BORDER_COLOR[1] / 255,
-                self.BORDER_COLOR[2] / 255,
+                self.border_color[0] / 255,
+                self.border_color[1] / 255,
+                self.border_color[2] / 255,
             )
         canvas.roundRect(
             x, 0, width, height, self.CARD_CORNER_DIAMETER, stroke=0, fill=1
@@ -646,7 +645,7 @@ class LargeCard(CardLayout):
 
     def draw(self, canvas):
         super().draw(canvas)
-        canvas.setFillColor(self.BORDER_COLOR)
+        canvas.setFillColor(self.border_color)
         canvas.rect(
             self.WIDTH * 1.5 - self.STANDARD_BORDER / 2,
             0,
@@ -803,7 +802,7 @@ class MonsterCardLayout(CardLayout):
             LineDivider(
                 width=line_width,
                 xoffset=-self.TEXT_MARGIN,
-                fill_color=self.BORDER_COLOR,
+                fill_color=self.border_color,
             )
         )
 
@@ -827,7 +826,7 @@ class MonsterCardLayout(CardLayout):
             LineDivider(
                 width=line_width,
                 xoffset=-self.TEXT_MARGIN,
-                fill_color=self.BORDER_COLOR,
+                fill_color=self.border_color,
             )
         )
 
@@ -852,7 +851,7 @@ class MonsterCardLayout(CardLayout):
                 LineDivider(
                     width=line_width,
                     xoffset=-self.TEXT_MARGIN,
-                    fill_color=self.BORDER_COLOR,
+                    fill_color=self.border_color,
                 )
             )
 
@@ -875,7 +874,7 @@ class MonsterCardLayout(CardLayout):
                 LineDivider(
                     width=line_width,
                     xoffset=-self.TEXT_MARGIN,
-                    fill_color=self.BORDER_COLOR,
+                    fill_color=self.border_color,
                 )
             )
 
