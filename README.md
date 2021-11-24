@@ -62,7 +62,7 @@ Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds 
 - **image_path** - Path to the image to insert on the front of the card. This can either be a full path, or relative to the location of the YAML file.
 - **armor_class** - The armor class of the monster (top left of the card), can include any text e.g. ``15 (Leather armor, shield)``
 - **max_hit_points** - The max hit points of the monster (top right of the card), can include any text e.g. ``7 (2d6)``
-- **max_hit_points** - The speed of the monster (below armor_class), can include any text e.g. ``30ft., fly 60 ft.``
+- **speed** - The speed of the monster (below armor_class), can include any text e.g. ``30ft., fly 60 ft.``
 - **strength, dexterity, constitution, intelligence, wisdom, charisma** - Ability modifiers show at the top of the card. They can also include ability scores e.g. `-1` or `8 (-1)`
 - **challenge_rating** - The challenge rating of the monster, white text show at the bottom of the back of the card
 - **experience_points** - The experience points earned for defeating the monster, shown next to the challenge rating
@@ -70,6 +70,7 @@ Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds 
 - **attributes** - A dictionary of the monsters "attributes", these appear in the top half of the second section of the card. Some common attributes include: `Skills`, `Senses`, `Languages`, `Damage Immunities`. The key will be typeset in **bold** while the value will be typeset as regular text.
 - **abilities** - A dictionary of the monsters "abilities", these appear below the ``attributes`` in the second section of the card. The key will be typeset in *Italic* while the value will be typeset as regular text.
 - **actions** - A dictionary of the monsters "actions", these appear in the third section of the card. The key will be typeset in **_Bold Italic_** while the value will be typeset as regular text.
+- **legendary** - A list containing a single intro text along with entries as per abilities
 
 ### Example
 ``` YAML
@@ -98,6 +99,12 @@ Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds 
   actions:
     Scimitar: +4, 5 ft., 5 (1d6 + 2) slashing damage.
     Shortbow: +4, range 80/320 ft., 5 (1d6 + 2) piercing damage.
+  legendary:
+    - This is a special goblin, who for the the sake of this example can take 3 legendary actions,
+    choosing from the options below. Only one legendary action can be used at a time and only at
+    the end of another creature's turn. The goblin regains spent legendary actions at the start
+    of its turn.<br/>
+    - Poison Gas: The goblin is able to "naturally" produce a noxious poison gas cloud, that causes 1 (1d4) of poison damage
 ```
 
 
