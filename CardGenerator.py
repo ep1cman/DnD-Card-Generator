@@ -520,14 +520,7 @@ class CardLayout(ABC):
 
     def _draw_single_border(self, canvas, x, width, height):
         canvas.saveState()
-        if type(self.border_color) == str:
-            canvas.setFillColor(self.border_color)
-        else:
-            canvas.setFillColorRGB(
-                self.border_color[0] / 255,
-                self.border_color[1] / 255,
-                self.border_color[2] / 255,
-            )
+        canvas.setFillColor(self.border_color)
         canvas.roundRect(
             x, 0, width, height, self.CARD_CORNER_DIAMETER, stroke=0, fill=1
         )

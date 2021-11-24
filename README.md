@@ -71,7 +71,7 @@ Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds 
 - **abilities** - A dictionary of the monsters "abilities", these appear below the ``attributes`` in the second section of the card. The key will be typeset in *Italic* while the value will be typeset as regular text.
 - **actions** - A dictionary of the monsters "actions", these appear in the third section of the card. The key will be typeset in **_Bold Italic_** while the value will be typeset as regular text.
 - **legendary** - A list containing a single intro text along with entries as per abilities
-- **color** - A color name (e.g. `red`), hex color code (e.g. `#0000dd`) or array of RGB colors (e.g. `[200, 200, 0]`).
+- **color** - A color name (e.g. `red`), hex color code (e.g. `#0000dd`) or array of RGB colors (e.g. `[0.7, 0.7, 0]`).
 
 ### Example
 ``` YAML
