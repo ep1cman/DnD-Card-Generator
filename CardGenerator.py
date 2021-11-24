@@ -219,7 +219,6 @@ class LineDivider(Flowable):
         if not self._at_top():
             canvas = self.canv
             canvas.setFillColor(self.fill_color)
-            canvas.setFillColor("red")
             canvas.rect(self.xoffset, 0, self.width, self.line_height, stroke=0, fill=1)
 
 
@@ -303,7 +302,6 @@ class CardLayout(ABC):
     TEXT_MARGIN = 2 * mm
     BASE_WIDTH = 63 * mm
     BASE_HEIGHT = 89 * mm
-    BORDER_COLOR = "red"
     TITLE_BAR_HEIGHT = 4.8 * mm
 
     # These must be set by sub classes
@@ -330,6 +328,7 @@ class CardLayout(ABC):
         self.artist = artist
         self.fonts = fonts
         self.background_image_path = background
+        self.border_color = border_color
 
         self.front_image_path = os.path.abspath(image_path)
         # Figure out front orientation
@@ -501,7 +500,7 @@ class CardLayout(ABC):
 
         # Subtitle
         subtitle_line_bottom = title_line_bottom - self.STANDARD_BORDER
-        canvas.setFillColor(self.BORDER_COLOR)
+        canvas.setFillColor(self.border_color)
         canvas.rect(
             self.WIDTH,
             subtitle_line_bottom,
@@ -522,14 +521,7 @@ class CardLayout(ABC):
 
     def _draw_single_border(self, canvas, x, width, height):
         canvas.saveState()
-        if type(self.BORDER_COLOR) == str:
-            canvas.setFillColor(self.BORDER_COLOR)
-        else:
-            canvas.setFillColorRGB(
-                self.BORDER_COLOR[0] / 255,
-                self.BORDER_COLOR[1] / 255,
-                self.BORDER_COLOR[2] / 255,
-            )
+        canvas.setFillColor(self.border_color)
         canvas.roundRect(
             x, 0, width, height, self.CARD_CORNER_DIAMETER, stroke=0, fill=1
         )
@@ -647,7 +639,7 @@ class LargeCard(CardLayout):
 
     def draw(self, canvas):
         super().draw(canvas)
-        canvas.setFillColor(self.BORDER_COLOR)
+        canvas.setFillColor(self.border_color)
         canvas.rect(
             self.WIDTH * 1.5 - self.STANDARD_BORDER / 2,
             0,
@@ -804,7 +796,7 @@ class MonsterCardLayout(CardLayout):
             LineDivider(
                 width=line_width,
                 xoffset=-self.TEXT_MARGIN,
-                fill_color=self.BORDER_COLOR,
+                fill_color=self.border_color,
             )
         )
 
@@ -828,7 +820,7 @@ class MonsterCardLayout(CardLayout):
             LineDivider(
                 width=line_width,
                 xoffset=-self.TEXT_MARGIN,
-                fill_color=self.BORDER_COLOR,
+                fill_color=self.border_color,
             )
         )
 
@@ -853,7 +845,7 @@ class MonsterCardLayout(CardLayout):
                 LineDivider(
                     width=line_width,
                     xoffset=-self.TEXT_MARGIN,
-                    fill_color=self.BORDER_COLOR,
+                    fill_color=self.border_color,
                 )
             )
 
@@ -876,7 +868,7 @@ class MonsterCardLayout(CardLayout):
                 LineDivider(
                     width=line_width,
                     xoffset=-self.TEXT_MARGIN,
-                    fill_color=self.BORDER_COLOR,
+                    fill_color=self.border_color,
                 )
             )
 
@@ -1054,6 +1046,7 @@ if __name__ == "__main__":
                 entry.get("reactions", None),
                 entry.get("legendary", None),
                 fonts=fonts,
+                border_color=entry.get("color", "red"),
             )
 
         card.draw(canvas)
