@@ -977,7 +977,12 @@ if __name__ == "__main__":
         dest="output_path",
         metavar="output_path",
     )
-    parser.add_argument("input", help="Path to input YAML file", action="store")
+    parser.add_argument(
+        "input", 
+        help="Path to input YAML file",
+        action="store",
+        type=lambda p: pathlib.Path(p).absolute()
+    )
     parser.add_argument(
         "-f",
         "--fonts",
@@ -1014,11 +1019,22 @@ if __name__ == "__main__":
 
     for entry in entries:
         if args.type == "monster":
+
+            image_path = None
+            if 'image_path' in entry:
+                image_path = pathlib.Path(entry['image_path'])
+                if not image_path.is_absolute():
+                    image_path = (args.input.parent / image_path).absolute()
+                if not image_path.exists():
+                    raise ValueError("Invalid `image_path` in `{}`: {}".format(entry['title'], entry['image_path']))
+            else:
+                image_path = ASSET_DIR / "placeholder.png"
+
             card = MonsterCard(
                 entry["title"],
                 entry["subtitle"],
                 entry.get("artist", None),
-                entry["image_path"],
+                image_path,
                 entry["armor_class"],
                 entry["max_hit_points"],
                 entry["speed"],
