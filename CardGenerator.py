@@ -443,8 +443,9 @@ class CardLayout(ABC):
             )
 
         # Titles
+        custom_scale = min(1.0, 20/len(self.title)) if isinstance(self, SmallCard) else 1.0
         canvas.setFillColor("black")
-        title_height = self.fonts.set_font(canvas, "title")
+        title_height = self.fonts.set_font(canvas, "title", custom_scale)
         canvas.drawCentredString(
             width * 0.5, self.FRONT_MARGINS[Border.BOTTOM], self.title.upper()
         )
