@@ -696,6 +696,7 @@ class MonsterCardLayout(CardLayout):
         attributes=None,
         abilities=None,
         actions=None,
+        bonus_actions=None,
         reactions=None,
         lengendary=None,
         *args,
@@ -718,6 +719,7 @@ class MonsterCardLayout(CardLayout):
         self.attributes = attributes
         self.abilities = abilities
         self.actions = actions
+        self.bonus_actions = bonus_actions
         self.reactions = reactions
         self.legendary = lengendary
 
@@ -845,6 +847,30 @@ class MonsterCardLayout(CardLayout):
             else:
                 element = paragraph
             self.elements.append(element)
+
+        if self.bonus_actions is not None:
+            # Divider 3
+            self.elements.append(
+                LineDivider(
+                    width=line_width,
+                    xoffset=-self.TEXT_MARGIN,
+                    fill_color=self.BORDER_COLOR,
+                )
+            )
+
+            title = Paragraph("BONUS ACTIONS", self.fonts.paragraph_styles["action_title"])
+            first_bonus_action = True
+            for heading, body in (self.bonus_actions or {}).items():
+                paragraph = Paragraph(
+                    "<i><b>{}.</b></i> {}".format(heading, body),
+                    self.fonts.paragraph_styles["text"],
+                )
+                if first_bonus_action:
+                    element = KeepTogether([title, paragraph])
+                    first_bonus_action = False
+                else:
+                    element = paragraph
+                self.elements.append(element)
 
         if self.reactions is not None:
             # Divider 3
@@ -1050,6 +1076,7 @@ if __name__ == "__main__":
                 entry["attributes"],
                 entry.get("abilities", None),
                 entry.get("actions", None),
+                entry.get("bonus_actions", None),
                 entry.get("reactions", None),
                 entry.get("legendary", None),
                 fonts=fonts,
