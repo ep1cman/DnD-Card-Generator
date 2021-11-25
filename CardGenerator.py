@@ -810,7 +810,7 @@ class MonsterCardLayout(CardLayout):
         # Abilities
         for heading, body in (self.abilities or {}).items():
             paragraph = Paragraph(
-                "<i><b>{}:</b></i> {}".format(heading, body),
+                "<i><b>{}.</b></i> {}".format(heading, body),
                 self.fonts.paragraph_styles["text"],
             )
             self.elements.append(paragraph)
@@ -829,7 +829,7 @@ class MonsterCardLayout(CardLayout):
         first_action = True
         for heading, body in (self.actions or {}).items():
             paragraph = Paragraph(
-                "<i><b>{}:</b></i> {}".format(heading, body),
+                "<i><b>{}.</b></i> {}".format(heading, body),
                 self.fonts.paragraph_styles["text"],
             )
             if first_action:
@@ -853,7 +853,7 @@ class MonsterCardLayout(CardLayout):
             first_reaction = True
             for heading, body in (self.reactions or {}).items():
                 paragraph = Paragraph(
-                    "<i><b>{}:</b></i> {}".format(heading, body),
+                    "<i><b>{}.</b></i> {}".format(heading, body),
                     self.fonts.paragraph_styles["text"],
                 )
                 if first_reaction:
@@ -882,7 +882,7 @@ class MonsterCardLayout(CardLayout):
                     )
                 elif type(entry) == dict:
                     paragraph = Paragraph(
-                        "<i><b>{}:</b></i> {}".format(*list(entry.items())[0]),
+                        "<i><b>{}.</b></i> {}".format(*list(entry.items())[0]),
                         self.fonts.paragraph_styles["legendary_action"],
                     )
                 else:
