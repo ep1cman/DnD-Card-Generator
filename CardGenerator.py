@@ -24,7 +24,7 @@ from reportlab.platypus.doctemplate import LayoutError
 from svglib.svglib import svg2rlg
 
 
-ASSET_DIR = pathlib.Path(__file__).parent.resolve() / 'assets'
+ASSET_DIR = pathlib.Path(__file__).parent.resolve() / "assets"
 
 
 # Returns the best orientation for the given image aspect ration
@@ -96,7 +96,8 @@ class Fonts(ABC):
 
     def set_font(self, canvas, section, custom_scale=1.0):
         canvas.setFont(
-            self.styles[section][0], self.styles[section][1] * self.FONT_SCALE * custom_scale
+            self.styles[section][0],
+            self.styles[section][1] * self.FONT_SCALE * custom_scale,
         )
         return self.styles[section][1]
 
@@ -121,9 +122,7 @@ class FreeFonts(Fonts):
         pdfmetrics.registerFont(
             TTFont("Universal Serif", self.FONT_DIR / "Universal Serif.ttf")
         )
-        pdfmetrics.registerFont(
-            TTFont("ScalySans", self.FONT_DIR / "ScalySans.ttf")
-        )
+        pdfmetrics.registerFont(TTFont("ScalySans", self.FONT_DIR / "ScalySans.ttf"))
         pdfmetrics.registerFont(
             TTFont("ScalySansItalic", self.FONT_DIR / "ScalySans-Italic.ttf")
         )
@@ -155,9 +154,7 @@ class AccurateFonts(Fonts):
 
     def _register_fonts(self):
         pdfmetrics.registerFont(
-            TTFont(
-                "ModestoExpanded", self.FONT_DIR / "ModestoExpanded-Regular.ttf"
-            )
+            TTFont("ModestoExpanded", self.FONT_DIR / "ModestoExpanded-Regular.ttf")
         )
         pdfmetrics.registerFont(
             TTFont("ModestoTextLight", self.FONT_DIR / "ModestoText-Light.ttf")
@@ -360,10 +357,10 @@ class CardLayout(ABC):
             element = self.elements.pop(0)
 
             if type(element) == LineDivider:
-                
+
                 # Don't place a Line Divider if there is nothing after it
                 if len(self.elements) == 0:
-                    break;
+                    break
 
                 # Caluclate how much space is left
                 available_height = (
@@ -384,12 +381,11 @@ class CardLayout(ABC):
             # DEBUG: Draw frame boundary
             # current_frame.drawBoundary(canvas)
 
-
             # Could not draw into current frame
             result = current_frame.add(element, canvas)
             if result == 0:
                 # We couldn't draw the element, so put it back
-                self.elements.insert(0,element)
+                self.elements.insert(0, element)
                 try:
                     current_frame = next(frames)
                 # No more frames
@@ -442,7 +438,9 @@ class CardLayout(ABC):
             )
 
         # Titles
-        custom_scale = min(1.0, 20/len(self.title)) if isinstance(self, SmallCard) else 1.0
+        custom_scale = (
+            min(1.0, 20 / len(self.title)) if isinstance(self, SmallCard) else 1.0
+        )
         canvas.setFillColor("black")
         title_height = self.fonts.set_font(canvas, "title", custom_scale)
         canvas.drawCentredString(
@@ -659,8 +657,10 @@ class EpicCard(LargeCard):
         # Card is square, don't rotate it
         self.front_orientation = Orientation.NORMAL
 
+
 class SuperEpicCard(EpicCard):
     HEIGHT = CardLayout.BASE_WIDTH * 3
+
 
 class MonsterCardLayout(CardLayout):
 
@@ -773,7 +773,10 @@ class MonsterCardLayout(CardLayout):
             self.charisma,
         ]
         # if modifiers are (int), e.g. 13, then automatically reformat as "13 (+1)"
-        modifiers = [(m if isinstance(m, str) else "%d (%+d)" % (m, math.floor((m-10)/2))) for m in modifiers]
+        modifiers = [
+            (m if isinstance(m, str) else "%d (%+d)" % (m, math.floor((m - 10) / 2)))
+            for m in modifiers
+        ]
         modifier_table_data = [
             [
                 Paragraph(a, self.fonts.paragraph_styles["modifier_title"])
@@ -872,9 +875,11 @@ class MonsterCardLayout(CardLayout):
                 )
             )
 
-            title = Paragraph("LEGENDARY ACTIONS", self.fonts.paragraph_styles["action_title"])
+            title = Paragraph(
+                "LEGENDARY ACTIONS", self.fonts.paragraph_styles["action_title"]
+            )
             first_legnedary = True
-            for entry in (self.legendary or []):
+            for entry in self.legendary or []:
                 if type(entry) == str:
                     paragraph = Paragraph(
                         entry,
@@ -886,9 +891,10 @@ class MonsterCardLayout(CardLayout):
                         self.fonts.paragraph_styles["legendary_action"],
                     )
                 else:
-                    TypeError('Legendary action cannot be type "{}"'.format(type(entry)))
-                
-                
+                    TypeError(
+                        'Legendary action cannot be type "{}"'.format(type(entry))
+                    )
+
                 if first_legnedary:
                     element = KeepTogether([title, paragraph])
                     first_legnedary = False
@@ -933,7 +939,6 @@ class CardGenerator(ABC):
         self._kwargs = kwargs
 
     def draw(self, canvas):
-        # TODO: Find a way to clear the page not just draw over it
         for size in self.sizes:
             try:
                 card_layout = size(*self._args, **self._kwargs)
@@ -974,10 +979,10 @@ if __name__ == "__main__":
         metavar="output_path",
     )
     parser.add_argument(
-        "input", 
+        "input",
         help="Path to input YAML file",
         action="store",
-        type=lambda p: pathlib.Path(p).absolute()
+        type=lambda p: pathlib.Path(p).absolute(),
     )
     parser.add_argument(
         "-f",
@@ -1017,12 +1022,16 @@ if __name__ == "__main__":
         if args.type == "monster":
 
             image_path = None
-            if 'image_path' in entry:
-                image_path = pathlib.Path(entry['image_path'])
+            if "image_path" in entry:
+                image_path = pathlib.Path(entry["image_path"])
                 if not image_path.is_absolute():
                     image_path = (args.input.parent / image_path).absolute()
                 if not image_path.exists():
-                    raise ValueError("Invalid `image_path` in `{}`: {}".format(entry['title'], entry['image_path']))
+                    raise ValueError(
+                        "Invalid `image_path` in `{}`: {}".format(
+                            entry["title"], entry["image_path"]
+                        )
+                    )
             else:
                 image_path = ASSET_DIR / "placeholder.png"
 
