@@ -940,7 +940,10 @@ class CardGenerator(ABC):
                 card_layout.draw(canvas)
                 break
             except TemplateTooSmall:
-                pass
+                # Reset the page
+                canvas._restartAccumulators()
+                canvas.init_graphics_state()
+                canvas.state_stack = []
         else:
             print("Could not fit {}".format(self._args[0]))
 
