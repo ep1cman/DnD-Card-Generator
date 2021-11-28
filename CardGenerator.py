@@ -274,6 +274,7 @@ class CardLayout(ABC):
     BACKGROUND_CORNER_DIAMETER = 2 * mm
     LOGO_WIDTH = 42 * mm
     STANDARD_BORDER = 2.5 * mm
+    STANDARD_MARGIN = 1.0 * mm
     TEXT_MARGIN = 2 * mm
     BASE_WIDTH = 63 * mm
     BASE_HEIGHT = 89 * mm
@@ -296,7 +297,7 @@ class CardLayout(ABC):
         fonts=FreeFonts(),
     ):
         self.frames = []
-        self.FRONT_MARGINS = tuple([x + 1 * mm for x in self.BORDER_FRONT])
+        self.FRONT_MARGINS = tuple([x + self.STANDARD_MARGIN for x in self.BORDER_FRONT])
 
         self.title = title
         self.subtitle = subtitle
