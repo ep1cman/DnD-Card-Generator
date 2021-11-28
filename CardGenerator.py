@@ -344,12 +344,8 @@ class CardLayout(ABC):
                     break
 
                 # Caluclate how much space is left
-                available_height = (
-                    current_frame._y
-                    - current_frame._y1p
-                    # - self.elements[0].getSpaceBefore()
-                )
                 available_width = current_frame._getAvailableWidth()
+                available_height = current_frame._y - current_frame._y1p
 
                 # Calculate how much heigh is required for the line and the next element
                 _, line_height = element.wrap(available_width, 0xFFFFFFFF)
@@ -716,7 +712,6 @@ class MonsterCardLayout(CardLayout):
         canvas.drawString(*self.source_location, self.source)
 
     def fill_frames(self, canvas):
-
         top_stats = [
             [
                 Paragraph(
@@ -859,7 +854,7 @@ class MonsterCardLayout(CardLayout):
             title = Paragraph(
                 "LEGENDARY ACTIONS", self.fonts.paragraph_styles["action_title"]
             )
-            first_legnedary = True
+            first_legendary = True
             for entry in self.legendary or []:
                 if type(entry) == str:
                     paragraph = Paragraph(
@@ -876,9 +871,9 @@ class MonsterCardLayout(CardLayout):
                         'Legendary action cannot be type "{}"'.format(type(entry))
                     )
 
-                if first_legnedary:
+                if first_legendary:
                     element = KeepTogether([title, paragraph])
-                    first_legnedary = False
+                    first_legendary = False
                 else:
                     element = paragraph
                 self.elements.append(element)
@@ -917,7 +912,6 @@ class MonsterCardSuperEpic(SuperEpicCard, MonsterCardLarge):
 
 
 class CardGenerator(ABC):
-
     sizes = []  # Set by subclass
 
     def __init__(self, *args, **kwargs):
