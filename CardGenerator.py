@@ -265,28 +265,6 @@ class Border(IntEnum):
     TOP = 3
 
 
-class Modifier(object):
-    @classmethod
-    def from_ability_score(cls, value):
-        if value < 1 or value > 30:
-            raise ValueError("Ability scores must be between 1 and 30 inclusive")
-        return cls(math.floor((value - 10) / 2))
-
-    def __init__(self, value):
-        value = int(value)
-        if value < -5 or value > 10:
-            raise ValueError(
-                "Ability score modifiers must be between -5 and +10 inclusive"
-            )
-        self.value = value
-
-    def __str__(self):
-        if self.value <= 0:
-            return "+{}".format(self.value)
-        else:
-            return "-{}".format(self.value)
-
-
 class TemplateTooSmall(Exception):
     pass
 
