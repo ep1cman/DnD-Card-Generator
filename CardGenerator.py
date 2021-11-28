@@ -280,12 +280,6 @@ class CardLayout(ABC):
     BASE_HEIGHT = 89 * mm
     TITLE_BAR_HEIGHT = 4.8 * mm
 
-    # These must be set by sub classes
-    WIDTH = None
-    HEIGHT = None
-    BORDER_FRONT = ()
-    BORDER_BACK = ()
-
     def __init__(
         self,
         title,
@@ -294,28 +288,34 @@ class CardLayout(ABC):
         image_path,
         background=ASSET_DIR / "background.png",
         border_color="red",
+        border_front=(0, 0, 0, 0),  # uninitialized
+        border_back=(0, 0, 0, 0),  # uninitialized
+        width=0,  # uninitialized
+        height=0,  # uninitialized
         fonts=FreeFonts(),
     ):
         self.frames = []
-        self.FRONT_MARGINS = tuple([x + self.STANDARD_MARGIN for x in self.BORDER_FRONT])
-
         self.title = title
         self.subtitle = subtitle
         self.artist = artist
         self.fonts = fonts
         self.background_image_path = background
         self.border_color = border_color
-
+        self.border_front = border_front
+        self.border_back = border_back
+        self.width = width
+        self.height = height
         self.front_image_path = os.path.abspath(image_path)
-        # Figure out front orientation
         self.front_orientation = best_orientation(
-            self.front_image_path, self.WIDTH, self.HEIGHT
+            self.front_image_path, self.width, self.height
+        )
+        self.elements = []
+        self.front_margins = tuple(
+            [x + self.STANDARD_MARGIN for x in self.border_front]
         )
 
-        self.elements = []
-
     def set_size(self, canvas):
-        canvas.setPageSize((self.WIDTH * 2, self.HEIGHT))
+        canvas.setPageSize((self.width * 2, self.height))
 
     def draw(self, canvas):
         self.set_size(canvas)
@@ -379,27 +379,27 @@ class CardLayout(ABC):
         canvas.saveState()
 
         # Draw red border
-        self._draw_single_border(canvas, 0, self.WIDTH, self.HEIGHT)
+        self._draw_single_border(canvas, 0, self.width, self.height)
 
         # Parchment background
         self._draw_single_background(
             canvas,
             0,
-            self.BORDER_FRONT,
-            self.WIDTH,
-            self.HEIGHT,
+            self.border_front,
+            self.width,
+            self.height,
             self.front_orientation,
         )
 
         # Set card orientation
         if self.front_orientation == Orientation.TURN90:
             canvas.rotate(90)
-            canvas.translate(0, -self.WIDTH)
-            width = self.HEIGHT
-            height = self.WIDTH
+            canvas.translate(0, -self.width)
+            width = self.height
+            height = self.width
         else:
-            width = self.WIDTH
-            height = self.HEIGHT
+            width = self.width
+            height = self.height
 
         # D&D logo
         dnd_logo = svg2rlg(ASSET_DIR / "logo.svg")
@@ -408,12 +408,12 @@ class CardLayout(ABC):
             dnd_logo.width *= factor
             dnd_logo.height *= factor
             dnd_logo.scale(factor, factor)
-            logo_margin = (self.BORDER_FRONT[Border.TOP] - dnd_logo.height) / 2
+            logo_margin = (self.border_front[Border.TOP] - dnd_logo.height) / 2
             renderPDF.draw(
                 dnd_logo,
                 canvas,
                 (width - self.LOGO_WIDTH) / 2,
-                height - self.BORDER_FRONT[Border.TOP] + logo_margin,
+                height - self.border_front[Border.TOP] + logo_margin,
             )
 
         # Titles
@@ -423,7 +423,7 @@ class CardLayout(ABC):
         canvas.setFillColor("black")
         title_height = self.fonts.set_font(canvas, "title", custom_scale)
         canvas.drawCentredString(
-            width * 0.5, self.FRONT_MARGINS[Border.BOTTOM], self.title.upper()
+            width * 0.5, self.front_margins[Border.BOTTOM], self.title.upper()
         )
 
         # Artist
@@ -432,20 +432,20 @@ class CardLayout(ABC):
             artist_font_height = self.fonts.set_font(canvas, "artist")
             canvas.drawCentredString(
                 width / 2,
-                self.BORDER_FRONT[Border.BOTTOM] - artist_font_height - 1 * mm,
+                self.border_front[Border.BOTTOM] - artist_font_height - 1 * mm,
                 "Artist: {}".format(self.artist),
             )
 
         # Image
-        image_bottom = self.FRONT_MARGINS[Border.BOTTOM] + title_height + 1 * mm
+        image_bottom = self.front_margins[Border.BOTTOM] + title_height + 1 * mm
         canvas.drawImage(
             self.front_image_path,
-            self.FRONT_MARGINS[Border.LEFT],
+            self.front_margins[Border.LEFT],
             image_bottom,
             width=width
-            - self.FRONT_MARGINS[Border.LEFT]
-            - self.FRONT_MARGINS[Border.RIGHT],
-            height=height - image_bottom - self.FRONT_MARGINS[Border.TOP],
+            - self.front_margins[Border.LEFT]
+            - self.front_margins[Border.RIGHT],
+            height=height - image_bottom - self.front_margins[Border.TOP],
             preserveAspectRatio=True,
             mask="auto",
         )
@@ -454,11 +454,11 @@ class CardLayout(ABC):
 
     def _draw_back(self, canvas):
         # Draw red border
-        self._draw_single_border(canvas, self.WIDTH, self.WIDTH, self.HEIGHT)
+        self._draw_single_border(canvas, self.width, self.width, self.height)
 
         # Parchment background
         self._draw_single_background(
-            canvas, self.WIDTH, self.BORDER_BACK, self.WIDTH, self.HEIGHT
+            canvas, self.width, self.border_back, self.width, self.height
         )
 
         # Title
@@ -466,20 +466,19 @@ class CardLayout(ABC):
         canvas.setFillColor("black")
         title_font_height = self.fonts.set_font(canvas, "title", custom_scale)
         title_line_bottom = (
-            self.HEIGHT - self.BORDER_BACK[Border.TOP] - self.TITLE_BAR_HEIGHT
+            self.height - self.border_back[Border.TOP] - self.TITLE_BAR_HEIGHT
         )
         title_bottom = (
             title_line_bottom + (self.TITLE_BAR_HEIGHT - title_font_height) / 2
         )
         canvas.drawCentredString(
-            self.WIDTH + self.BASE_WIDTH / 2, title_bottom, self.title.upper()
+            self.width + self.BASE_WIDTH / 2, title_bottom, self.title.upper()
         )
-
         # Subtitle
         subtitle_line_bottom = title_line_bottom - self.STANDARD_BORDER
         canvas.setFillColor(self.border_color)
         canvas.rect(
-            self.WIDTH,
+            self.width,
             subtitle_line_bottom,
             self.BASE_WIDTH,
             self.STANDARD_BORDER,
@@ -493,7 +492,7 @@ class CardLayout(ABC):
             subtitle_line_bottom + (self.STANDARD_BORDER - subtitle_font_height) / 2
         )
         canvas.drawCentredString(
-            self.WIDTH + self.BASE_WIDTH / 2, subtitle_bottom, self.subtitle
+            self.width + self.BASE_WIDTH / 2, subtitle_bottom, self.subtitle
         )
 
     def _draw_single_border(self, canvas, x, width, height):
@@ -538,34 +537,33 @@ class CardLayout(ABC):
 
 
 class SmallCard(CardLayout):
-    WIDTH = CardLayout.BASE_WIDTH
-    HEIGHT = CardLayout.BASE_HEIGHT
-    BORDER_FRONT = (
-        CardLayout.STANDARD_BORDER,
-        CardLayout.STANDARD_BORDER,
-        7 * mm,
-        7 * mm,
-    )
-    BORDER_BACK = (
-        CardLayout.STANDARD_BORDER,
-        CardLayout.STANDARD_BORDER,
-        9.2 * mm,
-        1.7 * mm,
-    )
+    def __init__(
+        self,
+        width=CardLayout.BASE_WIDTH,
+        height=CardLayout.BASE_HEIGHT,
+        border_front=(2.5 * mm, 2.5 * mm, 7.0 * mm, 7.0 * mm),
+        border_back=(2.5 * mm, 2.5 * mm, 9.2 * mm, 1.7 * mm),
+        **kwargs
+    ):
+        super().__init__(
+            width=width,
+            height=height,
+            border_front=border_front,
+            border_back=border_back,
+            **kwargs
+        )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         frame = Frame(
-            self.WIDTH + self.BORDER_BACK[Border.LEFT],
-            self.BORDER_BACK[Border.BOTTOM],
+            self.width + self.border_back[Border.LEFT],
+            self.border_back[Border.BOTTOM],
             self.BASE_WIDTH
-            - self.BORDER_BACK[Border.LEFT]
-            - self.BORDER_BACK[Border.RIGHT],
-            self.HEIGHT
-            - self.BORDER_BACK[Border.TOP]
+            - self.border_back[Border.LEFT]
+            - self.border_back[Border.RIGHT],
+            self.height
+            - self.border_back[Border.TOP]
             - self.TITLE_BAR_HEIGHT
             - self.STANDARD_BORDER
-            - self.BORDER_BACK[Border.BOTTOM],
+            - self.border_back[Border.BOTTOM],
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
@@ -576,35 +574,43 @@ class SmallCard(CardLayout):
 
 
 class LargeCard(CardLayout):
-    WIDTH = CardLayout.BASE_WIDTH * 2
-    HEIGHT = CardLayout.BASE_HEIGHT
+    def __init__(
+        self,
+        width=CardLayout.BASE_WIDTH * 2,
+        height=CardLayout.BASE_HEIGHT,
+        border_front=(3.5 * mm, 3.5 * mm, 7.0 * mm, 7.0 * mm),
+        border_back=(4.0 * mm, 4.0 * mm, 8.5 * mm, 3.0 * mm),
+        **kwargs
+    ):
+        super().__init__(
+            width=width,
+            height=height,
+            border_front=border_front,
+            border_back=border_back,
+            **kwargs
+        )
 
-    BORDER_FRONT = (3.5 * mm, 3.5 * mm, 7 * mm, 7 * mm)
-    BORDER_BACK = (4 * mm, 4 * mm, 8.5 * mm, 3 * mm)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         left_frame = Frame(
-            self.WIDTH + self.BORDER_BACK[Border.LEFT],
-            self.BORDER_BACK[Border.BOTTOM],
-            self.BASE_WIDTH - self.BORDER_BACK[Border.LEFT] - self.STANDARD_BORDER / 2,
-            self.HEIGHT
-            - self.BORDER_BACK[Border.TOP]
+            self.width + self.border_back[Border.LEFT],
+            self.border_back[Border.BOTTOM],
+            self.BASE_WIDTH - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            self.height
+            - self.border_back[Border.TOP]
             - self.TITLE_BAR_HEIGHT
             - self.STANDARD_BORDER
-            - self.BORDER_BACK[Border.BOTTOM],
+            - self.border_back[Border.BOTTOM],
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
             topPadding=1 * mm,
         )
         right_frame = Frame(
-            self.WIDTH * 1.5 + self.STANDARD_BORDER / 2,
-            self.BORDER_BACK[Border.BOTTOM],
-            self.BASE_WIDTH - self.BORDER_BACK[Border.LEFT] - self.STANDARD_BORDER / 2,
-            self.HEIGHT
-            - self.BORDER_BACK[Border.BOTTOM]
-            - self.BORDER_BACK[Border.TOP],
+            self.width * 1.5 + self.STANDARD_BORDER / 2,
+            self.border_back[Border.BOTTOM],
+            self.BASE_WIDTH - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            self.height
+            - self.border_back[Border.BOTTOM]
+            - self.border_back[Border.TOP],
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
@@ -618,35 +624,34 @@ class LargeCard(CardLayout):
         super().draw(canvas)
         canvas.setFillColor(self.border_color)
         canvas.rect(
-            self.WIDTH * 1.5 - self.STANDARD_BORDER / 2,
+            self.width * 1.5 - self.STANDARD_BORDER / 2,
             0,
             self.STANDARD_BORDER,
-            self.HEIGHT,
+            self.height,
             stroke=0,
             fill=1,
         )
 
 
 class EpicCard(LargeCard):
-    HEIGHT = CardLayout.BASE_WIDTH * 2
-    BORDER_BACK = (4 * mm, 4 * mm, 6.5 * mm, 3 * mm)
+    def __init__(
+        self,
+        height=CardLayout.BASE_WIDTH * 2,
+        border_back=(4.0 * mm, 4.0 * mm, 6.5 * mm, 3.0 * mm),
+        **kwargs
+    ):
+        super().__init__(height=height, border_back=border_back, **kwargs)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         # Card is square, don't rotate it
         self.front_orientation = Orientation.NORMAL
 
 
 class SuperEpicCard(EpicCard):
-    HEIGHT = CardLayout.BASE_WIDTH * 3
+    def __init__(self, height=CardLayout.BASE_WIDTH * 3, **kwargs):
+        super().__init__(height=height, **kwargs)
 
 
 class MonsterCardLayout(CardLayout):
-
-    # These must be set by subclasses
-    CHALLENGE_BOTTOM = None
-    SOURCE_LOCATION = []
-
     def __init__(
         self,
         title,
@@ -665,34 +670,28 @@ class MonsterCardLayout(CardLayout):
         challenge_rating,
         experience_points,
         source,
-        attributes=None,
-        abilities=None,
-        actions=None,
-        reactions=None,
-        lengendary=None,
-        *args,
+        attributes,
+        abilities,
+        actions,
+        reactions,
+        legendary,
         **kwargs
     ):
-        super().__init__(title, subtitle, artist, image_path, *args, **kwargs)
-
+        super().__init__(title, subtitle, artist, image_path, **kwargs)
         self.armor_class = armor_class
         self.max_hit_points = max_hit_points
         self.speed = speed
-
-        # Modifieres
         self.strength = strength
         self.dexterity = dexterity
         self.constitution = constitution
         self.intelligence = intelligence
         self.wisdom = wisdom
         self.charisma = charisma
-
         self.attributes = attributes
         self.abilities = abilities
         self.actions = actions
         self.reactions = reactions
-        self.legendary = lengendary
-
+        self.legendary = legendary
         self.challenge_rating = challenge_rating
         self.experience_points = experience_points
         self.source = source
@@ -703,15 +702,15 @@ class MonsterCardLayout(CardLayout):
         # Challenge
         self.fonts.set_font(canvas, "challenge")
         canvas.drawString(
-            self.WIDTH + self.BORDER_FRONT[Border.LEFT],
-            self.CHALLENGE_BOTTOM,
+            self.width + self.border_front[Border.LEFT],
+            self.challenge_bottom,
             "Challenge {} ({} XP)".format(
                 self.challenge_rating, self.experience_points
             ),
         )
         ### Source
         self.fonts.set_font(canvas, "text")
-        canvas.drawString(*self.SOURCE_LOCATION, self.source)
+        canvas.drawString(*self.source_location, self.source)
 
     def fill_frames(self, canvas):
 
@@ -773,7 +772,7 @@ class MonsterCardLayout(CardLayout):
         self.elements.append(t)
 
         # Divider 1
-        line_width = self.BASE_WIDTH - self.BORDER_BACK[Border.LEFT]
+        line_width = self.BASE_WIDTH - self.border_back[Border.LEFT]
         self.elements.append(
             LineDivider(
                 width=line_width,
@@ -885,19 +884,18 @@ class MonsterCardLayout(CardLayout):
 class MonsterCardSmall(SmallCard, MonsterCardLayout):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.CHALLENGE_BOTTOM = 5.5 * mm
-        self.SOURCE_LOCATION = (self.WIDTH + self.BORDER_BACK[Border.LEFT], 3 * mm)
+        self.challenge_bottom = 5.5 * mm
+        self.source_location = (self.width + self.border_back[Border.LEFT], 3 * mm)
 
 
 class MonsterCardLarge(LargeCard, MonsterCardLayout):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.CHALLENGE_BOTTOM = (
-            self.BORDER_BACK[Border.BOTTOM] - self.fonts.styles["challenge"][1]
-        ) / 2
-        self.SOURCE_LOCATION = (
-            self.WIDTH * 1.5 + self.STANDARD_BORDER / 2,
-            self.CHALLENGE_BOTTOM,
+        self.challenge_bottom = (
+            self.border_back[Border.BOTTOM] - self.fonts.styles["challenge"][1]
+        self.source_location = (
+            self.width * 1.5 + self.STANDARD_BORDER / 2,
+            self.challenge_bottom,
         )
 
 
@@ -929,7 +927,7 @@ class CardGenerator(ABC):
                 canvas.init_graphics_state()
                 canvas.state_stack = []
         else:
-            print("Could not fit {}".format(self._args[0]))
+            print("Could not fit {}".format(self._kwargs["title"]))
 
 
 class MonsterCard(CardGenerator):
@@ -986,9 +984,7 @@ if __name__ == "__main__":
     else:
         fonts = FreeFonts()
 
-    canvas = canvas.Canvas(
-        args.output_path, pagesize=(SmallCard.WIDTH * 4, SmallCard.HEIGHT)
-    )
+    canvas = canvas.Canvas(args.output_path, pagesize=(0, 0))
 
     with open(args.input, "r") as stream:
         try:
@@ -1015,27 +1011,27 @@ if __name__ == "__main__":
                 image_path = ASSET_DIR / "placeholder.png"
 
             card = MonsterCard(
-                entry["title"],
-                entry["subtitle"],
-                entry.get("artist", None),
-                image_path,
-                entry["armor_class"],
-                entry["max_hit_points"],
-                entry["speed"],
-                entry["strength"],
-                entry["dexterity"],
-                entry["constitution"],
-                entry["intelligence"],
-                entry["wisdom"],
-                entry["charisma"],
-                entry["challenge_rating"],
-                entry["experience_points"],
-                entry["source"],
-                entry["attributes"],
-                entry.get("abilities", None),
-                entry.get("actions", None),
-                entry.get("reactions", None),
-                entry.get("legendary", None),
+                title=entry["title"],
+                subtitle=entry["subtitle"],
+                artist=entry.get("artist", None),
+                image_path=image_path,
+                armor_class=entry["armor_class"],
+                max_hit_points=entry["max_hit_points"],
+                speed=entry["speed"],
+                strength=entry["strength"],
+                dexterity=entry["dexterity"],
+                constitution=entry["constitution"],
+                intelligence=entry["intelligence"],
+                wisdom=entry["wisdom"],
+                charisma=entry["charisma"],
+                challenge_rating=entry["challenge_rating"],
+                experience_points=entry["experience_points"],
+                source=entry["source"],
+                attributes=entry["attributes"],
+                abilities=entry.get("abilities", None),
+                actions=entry.get("actions", None),
+                reactions=entry.get("reactions", None),
+                legendary=entry.get("legendary", None),
                 fonts=fonts,
                 border_color=entry.get("color", "red"),
             )
