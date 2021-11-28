@@ -292,6 +292,7 @@ class CardLayout(ABC):
         border_back=(0, 0, 0, 0),  # uninitialized
         width=0,  # uninitialized
         height=0,  # uninitialized
+        bleed=0,  # uninitialized
         fonts=FreeFonts(),
     ):
         self.frames = []
@@ -301,10 +302,11 @@ class CardLayout(ABC):
         self.fonts = fonts
         self.background_image_path = background
         self.border_color = border_color
-        self.border_front = border_front
-        self.border_back = border_back
-        self.width = width
-        self.height = height
+        self.border_front = tuple([v + bleed for v in border_front])
+        self.border_back = tuple([v + bleed for v in border_back])
+        self.width = width + 2 * bleed
+        self.height = height + 2 * bleed
+        self.bleed = bleed
         self.front_image_path = os.path.abspath(image_path)
         self.front_orientation = best_orientation(
             self.front_image_path, self.width, self.height
@@ -408,7 +410,9 @@ class CardLayout(ABC):
             dnd_logo.width *= factor
             dnd_logo.height *= factor
             dnd_logo.scale(factor, factor)
-            logo_margin = (self.border_front[Border.TOP] - dnd_logo.height) / 2
+            logo_margin = (
+                self.border_front[Border.TOP] - self.bleed - dnd_logo.height
+            ) / 2
             renderPDF.draw(
                 dnd_logo,
                 canvas,
@@ -465,22 +469,20 @@ class CardLayout(ABC):
         custom_scale = min(1.0, 20 / len(self.title))
         canvas.setFillColor("black")
         title_font_height = self.fonts.set_font(canvas, "title", custom_scale)
-        title_line_bottom = (
-            self.height - self.border_back[Border.TOP] - self.TITLE_BAR_HEIGHT
-        )
+        title_line_bottom = self.frames[0]._y2 + self.STANDARD_BORDER
         title_bottom = (
             title_line_bottom + (self.TITLE_BAR_HEIGHT - title_font_height) / 2
         )
-        canvas.drawCentredString(
-            self.width + self.BASE_WIDTH / 2, title_bottom, self.title.upper()
-        )
+        title_center = (self.frames[0]._x1 + self.frames[0]._x2) / 2
+        canvas.drawCentredString(title_center, title_bottom, self.title.upper().strip())
+
         # Subtitle
         subtitle_line_bottom = title_line_bottom - self.STANDARD_BORDER
         canvas.setFillColor(self.border_color)
         canvas.rect(
-            self.width,
-            subtitle_line_bottom,
-            self.BASE_WIDTH,
+            self.frames[0]._x1,
+            self.frames[0]._y2,
+            self.frames[0]._width,
             self.STANDARD_BORDER,
             stroke=0,
             fill=1,
@@ -491,17 +493,20 @@ class CardLayout(ABC):
         subtitle_bottom = (
             subtitle_line_bottom + (self.STANDARD_BORDER - subtitle_font_height) / 2
         )
-        canvas.drawCentredString(
-            self.width + self.BASE_WIDTH / 2, subtitle_bottom, self.subtitle
-        )
+        canvas.drawCentredString(title_center, subtitle_bottom, self.subtitle)
 
     def _draw_single_border(self, canvas, x, width, height):
         canvas.saveState()
         canvas.setFillColor(self.border_color)
         canvas.roundRect(
-            x, 0, width, height, self.CARD_CORNER_DIAMETER, stroke=0, fill=1
+            x,
+            0,
+            width,
+            height,
+            max(self.CARD_CORNER_DIAMETER - self.bleed, 0.0 * mm),
+            stroke=0,
+            fill=1,
         )
-
         canvas.restoreState()
 
     def _draw_single_background(
@@ -556,9 +561,7 @@ class SmallCard(CardLayout):
         frame = Frame(
             self.width + self.border_back[Border.LEFT],
             self.border_back[Border.BOTTOM],
-            self.BASE_WIDTH
-            - self.border_back[Border.LEFT]
-            - self.border_back[Border.RIGHT],
+            self.width - self.border_back[Border.LEFT] - self.border_back[Border.RIGHT],
             self.height
             - self.border_back[Border.TOP]
             - self.TITLE_BAR_HEIGHT
@@ -593,7 +596,7 @@ class LargeCard(CardLayout):
         left_frame = Frame(
             self.width + self.border_back[Border.LEFT],
             self.border_back[Border.BOTTOM],
-            self.BASE_WIDTH - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            self.width / 2 - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
             self.height
             - self.border_back[Border.TOP]
             - self.TITLE_BAR_HEIGHT
@@ -607,7 +610,7 @@ class LargeCard(CardLayout):
         right_frame = Frame(
             self.width * 1.5 + self.STANDARD_BORDER / 2,
             self.border_back[Border.BOTTOM],
-            self.BASE_WIDTH - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            self.width / 2 - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
             self.height
             - self.border_back[Border.BOTTOM]
             - self.border_back[Border.TOP],
@@ -772,7 +775,7 @@ class MonsterCardLayout(CardLayout):
         self.elements.append(t)
 
         # Divider 1
-        line_width = self.BASE_WIDTH - self.border_back[Border.LEFT]
+        line_width = self.frames[0]._width
         self.elements.append(
             LineDivider(
                 width=line_width,
@@ -884,15 +887,21 @@ class MonsterCardLayout(CardLayout):
 class MonsterCardSmall(SmallCard, MonsterCardLayout):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.challenge_bottom = 5.5 * mm
-        self.source_location = (self.width + self.border_back[Border.LEFT], 3 * mm)
+        self.challenge_bottom = 5.5 * mm + self.bleed
+        self.source_location = (
+            self.width + self.border_back[Border.LEFT],
+            3 * mm + self.bleed,
+        )
 
 
 class MonsterCardLarge(LargeCard, MonsterCardLayout):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.challenge_bottom = (
-            self.border_back[Border.BOTTOM] - self.fonts.styles["challenge"][1]
+            self.border_back[Border.BOTTOM]
+            - self.bleed
+            - self.fonts.styles["challenge"][1]
+        ) / 2 + self.bleed
         self.source_location = (
             self.width * 1.5 + self.STANDARD_BORDER / 2,
             self.challenge_bottom,
@@ -970,6 +979,14 @@ if __name__ == "__main__":
         choices=["free", "accurate"],
         dest="fonts",
     )
+    parser.add_argument(
+        "-b",
+        "--bleed",
+        help="How many millimeters of print bleed radius to add around each card.",
+        action="store",
+        default=0,
+        type=lambda b: float(b) * mm,
+    )
 
     args = parser.parse_args()
 
@@ -1034,6 +1051,7 @@ if __name__ == "__main__":
                 legendary=entry.get("legendary", None),
                 fonts=fonts,
                 border_color=entry.get("color", "red"),
+                bleed=args.bleed,
             )
 
         card.draw(canvas)
