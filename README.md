@@ -36,6 +36,8 @@ optional arguments:
                         Output file path
   -f {free,accurate}, --fonts {free,accurate}
                         What fonts to use when generating cards
+  -b radius, --bleed radius
+                        How many millimeters to extend the card border.
 ```
 Included in the `example` directory is an example YAML file that generates a `Goblin` card.
 
