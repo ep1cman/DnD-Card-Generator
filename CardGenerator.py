@@ -126,7 +126,7 @@ class FreeFonts(Fonts):
         "subcategory": ("Universal Serif", 1.5 * mm, "black"),
         "heading": ("ScalySansBold", 1.5 * mm, "black"),
         "text": ("ScalySans", 1.5 * mm, "black"),
-        "artist": ("ScalySans", 1.25 * mm, "white"),
+        "artist": ("ScalySans", 1.5 * mm, "white"),
         "modifier_title": ("Universal Serif", 1.5 * mm, "black"),
     }
 
