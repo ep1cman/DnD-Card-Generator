@@ -568,7 +568,7 @@ class SmallCard(CardLayout):
         width=CardLayout.BASE_WIDTH,
         height=CardLayout.BASE_HEIGHT,
         border_front=(2.5 * mm, 2.5 * mm, 7.0 * mm, 7.0 * mm),
-        border_back=(2.5 * mm, 2.5 * mm, 9.2 * mm, 1.7 * mm),
+        border_back=(2.5 * mm, 2.5 * mm, 9.2 * mm, 2.5 * mm),
         **kwargs,
     ):
         super().__init__(
