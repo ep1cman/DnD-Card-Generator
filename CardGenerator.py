@@ -122,6 +122,8 @@ class FreeFonts(Fonts):
         "title": ("Universal Serif", 2.5 * mm, "black"),
         "subtitle": ("ScalySans", 1.5 * mm, "white"),
         "challenge": ("Universal Serif", 2.25 * mm, "black"),
+        "category": ("Universal Serif", 2.25 * mm, "black"),
+        "subcategory": ("Universal Serif", 1.5 * mm, "black"),
         "heading": ("ScalySansBold", 1.5 * mm, "black"),
         "text": ("ScalySans", 1.5 * mm, "black"),
         "artist": ("ScalySans", 1.25 * mm, "white"),
@@ -156,6 +158,8 @@ class AccurateFonts(Fonts):
         "title": ("ModestoExpanded", 2.5 * mm, "black"),
         "subtitle": ("ModestoTextLight", 1.5 * mm, "white"),
         "challenge": ("ModestoExpanded", 2.25 * mm, "black"),
+        "category": ("ModestoExpanded", 2.25 * mm, "black"),
+        "subcategory": ("ModestoExpanded", 1.5 * mm, "black"),
         "heading": ("ModestoTextBold", 1.5 * mm, "black"),
         "text": ("ModestoTextLight", 1.5 * mm, "black"),
         "artist": ("ModestoTextLight", 1.25 * mm, "white"),
@@ -900,6 +904,54 @@ class MonsterCardLayout(CardLayout):
                 self.elements.append(element)
 
 
+class ItemCardLayout(CardLayout):
+    def __init__(
+        self,
+        title,
+        subtitle,
+        artist,
+        image_path,
+        category,
+        subcategory,
+        description,
+        **kwargs,
+    ):
+        super().__init__(title, subtitle, artist, image_path, **kwargs)
+        self.category = category
+        self.subcategory = subcategory
+        self.description = description
+
+    def _draw_back(self, canvas):
+        super()._draw_back(canvas)
+
+        self.fonts.set_font(canvas, "category")
+        left_of_category_text = self.width + self.border_front[Border.LEFT]
+        width_of_category_text = canvas.stringWidth(self.category)
+        canvas.drawString(
+            left_of_category_text,
+            self.category_bottom,
+            self.category,
+        )
+
+        self.fonts.set_font(canvas, "subcategory")
+        canvas.drawString(
+            left_of_category_text + width_of_category_text + 1 * mm,
+            self.category_bottom,
+            "({})".format(self.subcategory),
+        )
+
+    def fill_frames(self, canvas):
+        if type(self.description) is list:
+            for text in self.description:
+                self.elements.append(
+                    Paragraph(text, self.fonts.paragraph_styles["text"])
+                )
+        else:
+            self.elements.append(
+                Paragraph(self.description, self.fonts.paragraph_styles["text"])
+            )
+
+
 class MonsterCardSmall(SmallCard, MonsterCardLayout):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -908,6 +960,15 @@ class MonsterCardSmall(SmallCard, MonsterCardLayout):
             self.width + self.border_back[Border.LEFT],
             3 * mm + self.bleed,
         )
+
+
+class ItemCardSmall(SmallCard, ItemCardLayout):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # category is centered in the footer
+        self.category_bottom = 3.5 * mm + self.bleed
+        # item cards have more padding at the top than moster cards
+        self.frames[0]._y2 += 1 * mm
 
 
 class MonsterCardLarge(LargeCard, MonsterCardLayout):
@@ -959,6 +1020,10 @@ class MonsterCard(CardGenerator):
     sizes = [MonsterCardSmall, MonsterCardLarge, MonsterCardEpic, MonsterCardSuperEpic]
 
 
+class ItemCard(CardGenerator):
+    sizes = [ItemCardSmall]  # maybe more in the future
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Generate D&D cards.")
@@ -968,7 +1033,7 @@ if __name__ == "__main__":
         help="What type of cards to generate",
         action="store",
         default="monster",
-        choices=["monster"],
+        choices=["monster", "item"],
         dest="type",
     )
     parser.add_argument(
@@ -1044,27 +1109,24 @@ if __name__ == "__main__":
             exit()
 
     for entry in entries:
-        if args.type == "monster":
-
-            image_path = None
-            if "image_path" in entry:
-                image_path = pathlib.Path(entry["image_path"])
-                if not image_path.is_absolute():
-                    image_path = (args.input.parent / image_path).absolute()
-                if not image_path.exists():
-                    raise ValueError(
-                        "Invalid `image_path` in `{}`: {}".format(
-                            entry["title"], entry["image_path"]
-                        )
+        image_path = None
+        if "image_path" in entry:
+            image_path = pathlib.Path(entry["image_path"])
+            if not image_path.is_absolute():
+                image_path = (args.input.parent / image_path).absolute()
+            if not image_path.exists():
+                raise ValueError(
+                    "Invalid `image_path` in `{}`: {}".format(
+                        entry["title"], entry["image_path"]
                     )
-            else:
-                image_path = ASSET_DIR / "placeholder.png"
+                )
 
+        if args.type == "monster":
             card = MonsterCard(
                 title=entry["title"],
                 subtitle=entry["subtitle"],
                 artist=entry.get("artist", None),
-                image_path=image_path,
+                image_path=image_path or ASSET_DIR / "placeholder_monster.png",
                 background=args.background,
                 armor_class=entry["armor_class"],
                 max_hit_points=entry["max_hit_points"],
@@ -1083,6 +1145,19 @@ if __name__ == "__main__":
                 actions=entry.get("actions", None),
                 reactions=entry.get("reactions", None),
                 legendary=entry.get("legendary", None),
+                fonts=fonts,
+                border_color=entry.get("color", "red"),
+                bleed=args.bleed,
+            )
+        elif args.type == "item":
+            card = ItemCard(
+                title=entry["title"],
+                subtitle=entry["subtitle"],
+                artist=entry.get("artist", None),
+                image_path=image_path or ASSET_DIR / "placeholder_item.png",
+                description=entry["description"],
+                category=entry["category"],
+                subcategory=entry.get("subcategory", None),
                 fonts=fonts,
                 border_color=entry.get("color", "red"),
                 bleed=args.bleed,
