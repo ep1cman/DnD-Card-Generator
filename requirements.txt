@@ -1,3 +1,4 @@
 pyyaml
 reportlab
 svglib
+beautifulsoup4
