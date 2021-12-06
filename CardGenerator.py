@@ -923,6 +923,7 @@ class CardGenerator(ABC):
             try:
                 card_layout = size(*self._args, **self._kwargs)
                 card_layout.draw(canvas)
+                canvas.showPage()
                 break
             except TemplateTooSmall:
                 # Reset the page
@@ -1049,5 +1050,4 @@ if __name__ == "__main__":
             )
 
         card.draw(canvas)
-        canvas.showPage()
     canvas.save()
