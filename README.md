@@ -38,6 +38,8 @@ optional arguments:
                         What fonts to use when generating cards
   -b radius, --bleed radius
                         How many millimeters to extend the card border.
+  --no-bg               Do not add the 'parchment' effect background.
+  --bg BACKGROUND       Custom background image to use
 ```
 Included in the `example` directory is an example YAML file that generates a `Goblin` card.
 

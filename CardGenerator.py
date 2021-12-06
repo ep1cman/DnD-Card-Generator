@@ -26,6 +26,14 @@ from svglib.svglib import svg2rlg
 
 ASSET_DIR = pathlib.Path(__file__).parent.resolve() / "assets"
 
+def ExistingFile(p):
+    """Argparse type for absolute paths that exist"""
+    p = pathlib.Path(p).absolute()
+    if p.exists():
+        return p
+    else:
+        raise argparse.ArgumentTypeError(f"`{p}` does not exist")
+
 
 # Returns the best orientation for the given image aspect ration
 def best_orientation(image_path, card_width, card_height):
@@ -286,7 +294,7 @@ class CardLayout(ABC):
         subtitle,
         artist,
         image_path,
-        background=ASSET_DIR / "background.png",
+        background,
         border_color="red",
         border_front=(0, 0, 0, 0),  # uninitialized
         border_back=(0, 0, 0, 0),  # uninitialized
@@ -510,6 +518,7 @@ class CardLayout(ABC):
     ):
         canvas.saveState()
 
+        canvas.setFillColor("white")
         clipping_mask = canvas.beginPath()
 
         if orientation == Orientation.TURN90:
@@ -528,11 +537,12 @@ class CardLayout(ABC):
                 height - margins[Border.TOP] - margins[Border.BOTTOM],
                 self.BACKGROUND_CORNER_DIAMETER,
             )
-        canvas.clipPath(clipping_mask, stroke=0, fill=0)
+        canvas.clipPath(clipping_mask, stroke=0, fill=1)
 
-        canvas.drawImage(
-            self.background_image_path, x, 0, width=width, height=height, mask=None
-        )
+        if self.background_image_path is not None:
+            canvas.drawImage(
+                self.background_image_path, x, 0, width=width, height=height, mask=None
+            )
 
         canvas.restoreState()
 
@@ -982,6 +992,22 @@ if __name__ == "__main__":
         default=0,
         type=lambda b: float(b) * mm,
     )
+    background_group = parser.add_mutually_exclusive_group()
+    background_group.add_argument(
+        "--no-bg",
+        help="Do not add the 'parchment' effect background.",
+        action="store_const",
+        const=None,
+        default=ASSET_DIR / "background.png",
+        dest="background"
+    )
+    background_group.add_argument(
+        "--bg",
+        help="Custom background image to use",
+        action="store",
+        dest="background",
+        type=ExistingFile
+    )
 
     args = parser.parse_args()
 
@@ -1027,6 +1053,7 @@ if __name__ == "__main__":
                 subtitle=entry["subtitle"],
                 artist=entry.get("artist", None),
                 image_path=image_path,
+                background = args.background,
                 armor_class=entry["armor_class"],
                 max_hit_points=entry["max_hit_points"],
                 speed=entry["speed"],
