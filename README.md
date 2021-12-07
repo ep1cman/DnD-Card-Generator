@@ -112,7 +112,6 @@ Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds 
     - Poison Gas: The goblin is able to "naturally" produce a noxious poison gas cloud, that causes 1 (1d4) of poison damage
 ```
 
-
 # Fonts
 Included in this repository are some free fonts that resemble the font used on the
 official cards as close as possible (if you know of a better fit, please let me 
@@ -123,6 +122,37 @@ will need to put the following fonts into the `fonts` folder in TTF format:
 - ModestoText-LightItalic.ttf
 - ModestoText-Bold.ttf
 - ModestoText-BoldItalic.ttf
+
+# Converter
+Bundled with this repo is a converter script (`convert.py`) that can take 
+[EncounterPlus](https://encounter.plus/) `.module`/`.compendium` files and turn 
+them into a YAML file useable with this tool, including images. Most importantly 
+this means you can use [EncounterLog](https://github.com/rrgeorge/EncounterLog) to 
+get YAML files + images for any content you own on [D&D Beyond](http://dndbeyond.com).
+
+```
+usage: convert.py [-h] [-o output_path] [--overwrite] [-f {encounterplus}] input
+
+Convert data into YAML from other formats
+
+positional arguments:
+  input                 Path to input data file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o output_path, --out output_path
+                        Output directory
+  --overwrite           Delete and overwrite converted data if it already exists
+  -f {encounterplus}, --format {encounterplus}
+                        What format the input is in
+```
+
+For example you can convert the "Basic Rules" module for use with
+this tool (after downloading the module using [EncounterLog](https://github.com/rrgeorge/EncounterLog)) like so:
+
+```
+> python convert.py br.module
+```
 
 # Acknowledgements
  - The parchment background image was taken from redit user Smyris' [monster manual template](https://www.reddit.com/r/DnD/comments/2x8u77/5e_tried_to_recreate_the_monster_manuals_style/).

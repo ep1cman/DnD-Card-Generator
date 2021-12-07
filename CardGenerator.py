@@ -26,6 +26,7 @@ from svglib.svglib import svg2rlg
 
 ASSET_DIR = pathlib.Path(__file__).parent.resolve() / "assets"
 
+
 def ExistingFile(p):
     """Argparse type for absolute paths that exist"""
     p = pathlib.Path(p).absolute()
@@ -554,14 +555,14 @@ class SmallCard(CardLayout):
         height=CardLayout.BASE_HEIGHT,
         border_front=(2.5 * mm, 2.5 * mm, 7.0 * mm, 7.0 * mm),
         border_back=(2.5 * mm, 2.5 * mm, 9.2 * mm, 1.7 * mm),
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             width=width,
             height=height,
             border_front=border_front,
             border_back=border_back,
-            **kwargs
+            **kwargs,
         )
 
         frame = Frame(
@@ -589,14 +590,14 @@ class LargeCard(CardLayout):
         height=CardLayout.BASE_HEIGHT,
         border_front=(3.5 * mm, 3.5 * mm, 7.0 * mm, 7.0 * mm),
         border_back=(4.0 * mm, 4.0 * mm, 8.5 * mm, 3.0 * mm),
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             width=width,
             height=height,
             border_front=border_front,
             border_back=border_back,
-            **kwargs
+            **kwargs,
         )
 
         left_frame = Frame(
@@ -647,7 +648,7 @@ class EpicCard(LargeCard):
         self,
         height=CardLayout.BASE_WIDTH * 2,
         border_back=(4.0 * mm, 4.0 * mm, 6.5 * mm, 3.0 * mm),
-        **kwargs
+        **kwargs,
     ):
         super().__init__(height=height, border_back=border_back, **kwargs)
 
@@ -684,7 +685,7 @@ class MonsterCardLayout(CardLayout):
         actions,
         reactions,
         legendary,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(title, subtitle, artist, image_path, **kwargs)
         self.armor_class = armor_class
@@ -999,14 +1000,14 @@ if __name__ == "__main__":
         action="store_const",
         const=None,
         default=ASSET_DIR / "background.png",
-        dest="background"
+        dest="background",
     )
     background_group.add_argument(
         "--bg",
         help="Custom background image to use",
         action="store",
         dest="background",
-        type=ExistingFile
+        type=ExistingFile,
     )
 
     args = parser.parse_args()
@@ -1053,7 +1054,7 @@ if __name__ == "__main__":
                 subtitle=entry["subtitle"],
                 artist=entry.get("artist", None),
                 image_path=image_path,
-                background = args.background,
+                background=args.background,
                 armor_class=entry["armor_class"],
                 max_hit_points=entry["max_hit_points"],
                 speed=entry["speed"],
