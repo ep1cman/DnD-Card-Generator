@@ -11,6 +11,8 @@ from dataclasses import dataclass, asdict
 import yaml
 from bs4 import BeautifulSoup
 
+from CardGenerator import ExistingFile
+
 
 def noop(self, *args, **kw):
     pass
@@ -124,15 +126,6 @@ cr_to_xp = {
     "29": "135,000",
     "30": "155,000",
 }
-
-
-def ExistingFile(p):
-    """Argparse type for absolute paths that exist"""
-    p = pathlib.Path(p).absolute()
-    if p.exists():
-        return p
-    else:
-        raise argparse.ArgumentTypeError(f"`{p}` does not exist")
 
 
 def generate(args):
