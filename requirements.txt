@@ -2,3 +2,5 @@ pyyaml
 reportlab
 svglib
 beautifulsoup4
+fuzzywuzzy
+python-Levenshtein
