@@ -933,12 +933,13 @@ class ItemCardLayout(CardLayout):
             self.category,
         )
 
-        self.fonts.set_font(canvas, "subcategory")
-        canvas.drawString(
-            left_of_category_text + width_of_category_text + 1 * mm,
-            self.category_bottom,
-            "({})".format(self.subcategory),
-        )
+        if self.subcategory is not None:
+            self.fonts.set_font(canvas, "subcategory")
+            canvas.drawString(
+                left_of_category_text + width_of_category_text + 1 * mm,
+                self.category_bottom,
+                "({})".format(self.subcategory),
+            )
 
     def fill_frames(self, canvas):
         if type(self.description) is list:
