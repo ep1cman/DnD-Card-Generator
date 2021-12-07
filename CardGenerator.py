@@ -969,12 +969,13 @@ if __name__ == "__main__":
         default="cards.pdf",
         dest="output_path",
         metavar="output_path",
+        type=lambda p: pathlib.Path(p).absolute(),
     )
     parser.add_argument(
         "input",
         help="Path to input YAML file",
         action="store",
-        type=lambda p: pathlib.Path(p).absolute(),
+        type=ExistingFile,
     )
     parser.add_argument(
         "-f",
