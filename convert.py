@@ -152,6 +152,8 @@ def convert(args):
     # Create output directory
     args.output_path.mkdir()
     (args.output_path / "images").mkdir()
+    (args.output_path / "images" / "items").mkdir()
+    (args.output_path / "images" / "monsters").mkdir()
 
     if args.format == "encounterplus":
         results = convert_encounterplus(args)
@@ -183,8 +185,10 @@ def convert_encounterplus(args):
             image = xml.findtext("image")
             if image is not None:
                 image_path = tempdir / (xml.tag + "s") / image
-                new_path = pathlib.Path("images") / (
-                    xml.findtext("name") + image_path.suffix
+                new_path = (
+                    pathlib.Path("images")
+                    / (xml.tag + "s")
+                    / (xml.findtext("name") + image_path.suffix)
                 )
                 image_path.rename(output_path / new_path)
                 return str(new_path)
