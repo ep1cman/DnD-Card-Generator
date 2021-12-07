@@ -1024,7 +1024,7 @@ if __name__ == "__main__":
     else:
         fonts = FreeFonts()
 
-    canvas = canvas.Canvas(args.output_path, pagesize=(0, 0))
+    canvas = canvas.Canvas(str(args.output_path), pagesize=(0, 0))
 
     with open(args.input, "r") as stream:
         try:
