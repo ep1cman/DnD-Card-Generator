@@ -1155,6 +1155,7 @@ if __name__ == "__main__":
                 subtitle=entry["subtitle"],
                 artist=entry.get("artist", None),
                 image_path=image_path or ASSET_DIR / "placeholder_item.png",
+                background=args.background,
                 description=entry["description"],
                 category=entry["category"],
                 subcategory=entry.get("subcategory", None),
