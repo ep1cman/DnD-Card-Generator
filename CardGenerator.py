@@ -4,6 +4,7 @@ import yaml
 import sys
 import argparse
 import pathlib
+import itertools
 
 from enum import Enum, IntEnum
 from abc import ABC
@@ -328,17 +329,17 @@ class CardLayout(ABC):
     def set_size(self, canvas):
         canvas.setPageSize((self.width * 2, self.height))
 
-    def draw(self, canvas):
+    def draw(self, canvas, split):
         self.set_size(canvas)
         self._draw_front(canvas)
         self._draw_back(canvas)
         self.fill_frames(canvas)
-        self._draw_frames(canvas)
+        self._draw_frames(canvas, split)
 
     def fill_frames(self, canvas):
         pass
 
-    def _draw_frames(self, canvas):
+    def _draw_frames(self, canvas, split=False):
         frames = iter(self.frames)
         current_frame = next(frames)
 
@@ -367,9 +368,18 @@ class CardLayout(ABC):
             # DEBUG: Draw frame boundary
             # current_frame.drawBoundary(canvas)
 
-            # Could not draw into current frame
             result = current_frame.add(element, canvas)
             if result == 0:
+                # Could not draw into current frame
+                if split:
+                    # Try splitting the element into the remaining space
+                    remaining = current_frame.split(element, canvas)
+                    if len(remaining):
+                        # it can fit, so add the fragment that can fit
+                        current_frame.add(remaining.pop(0), canvas)
+                        self.elements = remaining + self.elements
+                        continue
+
                 # We couldn't draw the element, so put it back
                 self.elements.insert(0, element)
                 try:
@@ -630,8 +640,8 @@ class LargeCard(CardLayout):
         self.frames.append(left_frame)
         self.frames.append(right_frame)
 
-    def draw(self, canvas):
-        super().draw(canvas)
+    def draw(self, canvas, split):
+        super().draw(canvas, split)
         canvas.setFillColor(self.border_color)
         canvas.rect(
             self.width * 1.5 - self.STANDARD_BORDER / 2,
@@ -930,10 +940,10 @@ class CardGenerator(ABC):
         self._kwargs = kwargs
 
     def draw(self, canvas):
-        for size in self.sizes:
+        for size, split in itertools.product(self.sizes, [False, True]):
             try:
                 card_layout = size(*self._args, **self._kwargs)
-                card_layout.draw(canvas)
+                card_layout.draw(canvas, split)
                 canvas.showPage()
                 break
             except TemplateTooSmall:
