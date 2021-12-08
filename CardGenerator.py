@@ -17,7 +17,7 @@ from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
 from reportlab.platypus import Frame, Paragraph, Table, TableStyle
-from reportlab.platypus.flowables import Flowable
+from reportlab.platypus.flowables import Flowable, Spacer
 from reportlab.lib.styles import ParagraphStyle, StyleSheet1
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.fonts import addMapping
@@ -956,6 +956,9 @@ class ItemCardLayout(CardLayout):
             )
 
     def fill_frames(self, canvas):
+        # Add a space before text
+        self.elements.append(Spacer(1 * mm, 1 * mm))
+
         if type(self.description) is list:
             for text in self.description:
                 self.elements.append(
@@ -982,8 +985,6 @@ class ItemCardSmall(SmallCard, ItemCardLayout):
         super().__init__(*args, **kwargs)
         # category is centered in the footer
         self.category_bottom = 3.5 * mm + self.bleed
-        # item cards have more padding at the top than moster cards
-        self.frames[0]._y2 += 1 * mm
 
 
 class MonsterCardLarge(LargeCard, MonsterCardLayout):
