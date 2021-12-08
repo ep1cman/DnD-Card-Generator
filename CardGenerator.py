@@ -580,19 +580,23 @@ class SmallCard(CardLayout):
         )
 
         frame = Frame(
+            # X
             self.width + self.border_back[Border.LEFT],
+            # Y
             self.border_back[Border.BOTTOM],
+            # Width
             self.width - self.border_back[Border.LEFT] - self.border_back[Border.RIGHT],
+            # Height
             self.height
             - self.border_back[Border.TOP]
             - self.TITLE_BAR_HEIGHT
             - self.STANDARD_BORDER
             - self.border_back[Border.BOTTOM],
+            # Padding
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
             topPadding=1 * mm,
-            showBoundary=True,
         )
         self.frames.append(frame)
 
@@ -615,26 +619,36 @@ class LargeCard(CardLayout):
         )
 
         left_frame = Frame(
+            # X
             self.width + self.border_back[Border.LEFT],
+            # Y
             self.border_back[Border.BOTTOM],
+            # Width
             self.width / 2 - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            # Height
             self.height
             - self.border_back[Border.TOP]
             - self.TITLE_BAR_HEIGHT
             - self.STANDARD_BORDER
             - self.border_back[Border.BOTTOM],
+            # Padding
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
             topPadding=1 * mm,
         )
         right_frame = Frame(
+            # X
             self.width * 1.5 + self.STANDARD_BORDER / 2,
+            # Y
             self.border_back[Border.BOTTOM],
+            # Width
             self.width / 2 - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            # Height
             self.height
             - self.border_back[Border.BOTTOM]
             - self.border_back[Border.TOP],
+            # Padding
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
