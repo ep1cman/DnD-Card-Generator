@@ -2400,33 +2400,6 @@
   actions:
     Claws: +0, 5 ft., 1 slashing damage.<br/>
   legendary: []
-- title: Cave Bear
-  subtitle: beast, Unaligned
-  artist: ''
-  armor_class: 12 (natural armor)
-  max_hit_points: 42 (5d10+15)
-  speed: walk 40 ft., swim 30 ft.
-  strength: 20 (+5)
-  dexterity: 10 (+5)
-  constitution: 16 (+5)
-  intelligence: 2 (+5)
-  wisdom: 13 (+5)
-  charisma: 7 (+5)
-  challenge_rating: '2'
-  experience_points: '450'
-  source: ''
-  attributes:
-    Skills: Perception +3
-    Senses: darkvision 60 ft., Passive Perception 13
-    Languages: '-'
-  abilities:
-    Keen Smell: The bear has advantage on Wisdom (Perception) checks that rely on
-      smell.<br/>
-  actions:
-    Multiattack: 'The bear makes two attacks: one with its bite and one with its claws.<br/>'
-    Bite: +7, 5 ft., 9 (1d8 + 5) piercing damage.<br/>
-    Claws: +7, 5 ft., 12 (2d6 + 5) slashing damage.<br/>
-  legendary: []
 - title: Centaur
   subtitle: monstrosity, Neutral Good
   artist: ''
@@ -9351,67 +9324,6 @@
     Bites: +4, 0 ft., one creature in the swarm's space. 5 (2d4) piercing damage,
       or 2 (1d4) piercing damage if the swarm has half of its hit points or fewer.<br/>
   legendary: []
-- title: Swarm of Beetles
-  subtitle: swarm of Medium beasts, Unaligned
-  artist: ''
-  armor_class: 12 (natural armor)
-  max_hit_points: 22 (5d8)
-  speed: walk 20 ft., burrow 5 ft., climb 20 ft.
-  strength: 3 (-4)
-  dexterity: 13 (-4)
-  constitution: 10 (-4)
-  intelligence: 1 (-4)
-  wisdom: 7 (-4)
-  charisma: 1 (-4)
-  challenge_rating: 1/2
-  experience_points: '100'
-  source: ''
-  attributes:
-    Damage Resistances: bludgeoning, piercing, slashing
-    Condition Immunities: charmed, frightened, grappled, paralyzed, petrified, prone,
-      restrained, stunned
-    Senses: blindsight 10 ft., Passive Perception 8
-    Languages: '-'
-  abilities:
-    Swarm: The swarm can occupy another creature's space and vice versa, and the swarm
-      can move through any opening large enough for a Tiny insect. The swarm can't
-      regain hit points or gain temporary hit points.<br/>
-  actions:
-    Bites: +3, 0 ft., one target in the swarm's space. 10 (4d4) piercing damage, or
-      5 (2d4) piercing damage if the swarm has half of its hit points or fewer.<br/>
-  legendary: []
-- title: Swarm of Centipedes
-  subtitle: swarm of Medium beasts, Unaligned
-  artist: ''
-  armor_class: 12 (natural armor)
-  max_hit_points: 22 (5d8)
-  speed: walk 20 ft., climb 20 ft.
-  strength: 3 (-4)
-  dexterity: 13 (-4)
-  constitution: 10 (-4)
-  intelligence: 1 (-4)
-  wisdom: 7 (-4)
-  charisma: 1 (-4)
-  challenge_rating: 1/2
-  experience_points: '100'
-  source: ''
-  attributes:
-    Damage Resistances: bludgeoning, piercing, slashing
-    Condition Immunities: charmed, frightened, grappled, paralyzed, petrified, prone,
-      restrained, stunned
-    Senses: blindsight 10 ft., Passive Perception 8
-    Languages: '-'
-  abilities:
-    Swarm: The swarm can occupy another creature's space and vice versa, and the swarm
-      can move through any opening large enough for a Tiny insect. The swarm can't
-      regain hit points or gain temporary hit points.<br/>
-  actions:
-    Bites: +3, 0 ft., one target in the swarm's space. 10 (4d4) piercing damage, or
-      5 (2d4) piercing damage if the swarm has half of its hit points or fewer.<br/>A
-      creature reduced to 0 hit points by a swarm of centipedes is stable but poisoned
-      for 1 hour, even after regaining hit points, and paralyzed while poisoned in
-      this way.<br/>
-  legendary: []
 - title: Swarm of Insects
   subtitle: swarm of Medium beasts, Unaligned
   artist: ''
@@ -9564,69 +9476,6 @@
   actions:
     Beaks: +4, 5 ft., one target in the swarm's space. 7 (2d6) piercing damage, or
       3 (1d6) piercing damage if the swarm has half of its hit points or fewer.<br/>
-  legendary: []
-- title: Swarm of Spiders
-  subtitle: swarm of Medium beasts, Unaligned
-  artist: ''
-  armor_class: 12 (natural armor)
-  max_hit_points: 22 (5d8)
-  speed: walk 20 ft., climb 20 ft.
-  strength: 3 (-4)
-  dexterity: 13 (-4)
-  constitution: 10 (-4)
-  intelligence: 1 (-4)
-  wisdom: 7 (-4)
-  charisma: 1 (-4)
-  challenge_rating: 1/2
-  experience_points: '100'
-  source: ''
-  attributes:
-    Damage Resistances: bludgeoning, piercing, slashing
-    Condition Immunities: charmed, frightened, grappled, paralyzed, petrified, prone,
-      restrained, stunned
-    Senses: blindsight 10 ft., Passive Perception 8
-    Languages: '-'
-  abilities:
-    Swarm: The swarm can occupy another creature's space and vice versa, and the swarm
-      can move through any opening large enough for a Tiny insect. The swarm can't
-      regain hit points or gain temporary hit points.<br/>
-    Spider Climb: The swarm can climb difficult surfaces, including upside down on
-      ceilings, without needing to make an ability check.<br/>
-    Web Sense: While in contact with a web, the swarm knows the exact location of
-      any other creature in contact with the same web.<br/>
-    Web Walker: The swarm ignores movement restrictions caused by webbing.<br/>
-  actions:
-    Bites: +3, 0 ft., one target in the swarm's space. 10 (4d4) piercing damage, or
-      5 (2d4) piercing damage if the swarm has half of its hit points or fewer.<br/>
-  legendary: []
-- title: Swarm of Wasps
-  subtitle: swarm of Medium beasts, Unaligned
-  artist: ''
-  armor_class: 12 (natural armor)
-  max_hit_points: 22 (5d8)
-  speed: walk 5 ft., fly 30 ft.
-  strength: 3 (-4)
-  dexterity: 13 (-4)
-  constitution: 10 (-4)
-  intelligence: 1 (-4)
-  wisdom: 7 (-4)
-  charisma: 1 (-4)
-  challenge_rating: 1/2
-  experience_points: '100'
-  source: ''
-  attributes:
-    Damage Resistances: bludgeoning, piercing, slashing
-    Condition Immunities: charmed, frightened, grappled, paralyzed, petrified, prone,
-      restrained, stunned
-    Senses: blindsight 10 ft., Passive Perception 8
-    Languages: '-'
-  abilities:
-    Swarm: The swarm can occupy another creature's space and vice versa, and the swarm
-      can move through any opening large enough for a Tiny insect. The swarm can't
-      regain hit points or gain temporary hit points.<br/>
-  actions:
-    Bites: +3, 0 ft., one target in the swarm's space. 10 (4d4) piercing damage, or
-      5 (2d4) piercing damage if the swarm has half of its hit points or fewer.<br/>
   legendary: []
 - title: Tarrasque
   subtitle: monstrosity (titan), Unaligned
