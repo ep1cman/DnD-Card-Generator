@@ -959,15 +959,36 @@ class ItemCardLayout(CardLayout):
         # Add a space before text
         self.elements.append(Spacer(1 * mm, 1 * mm))
 
-        if type(self.description) is list:
-            for text in self.description:
-                self.elements.append(
-                    Paragraph(text, self.fonts.paragraph_styles["text"])
-                )
-        else:
+        if type(self.description) == str:
             self.elements.append(
                 Paragraph(self.description, self.fonts.paragraph_styles["text"])
             )
+            return
+        if type(self.description) != list:
+            raise ValueError(
+                f"Item `{self.title}` description should be a `str` or `list`"
+            )
+
+        for entry in self.description:
+            if type(entry) == str:
+                self.elements.append(
+                    Paragraph(entry, self.fonts.paragraph_styles["text"])
+                )
+            if type(entry) == dict:
+                for title, description in entry.items():
+
+                    text = f"<i><b>{title}.</b></i>"
+                    if description is not None:
+                        text += f" {description}"
+
+                    self.elements.append(
+                        Paragraph(
+                            text,
+                            self.fonts.paragraph_styles["text"],
+                        )
+                    )
+
+            # TODO: Tables
 
 
 class MonsterCardSmall(SmallCard, MonsterCardLayout):
