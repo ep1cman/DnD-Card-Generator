@@ -6,18 +6,21 @@ import argparse
 import pathlib
 import itertools
 
+from copy import copy
 from enum import Enum, IntEnum
 from abc import ABC
-from PIL import Image
+import PIL
 
+from reportlab.lib import utils
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.ttfonts import TTFError
 from reportlab.lib.units import mm
+from reportlab.lib.enums import TA_CENTER
 from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
 from reportlab.platypus import Frame, Paragraph, Table, TableStyle
-from reportlab.platypus.flowables import Flowable
+from reportlab.platypus.flowables import Flowable, Spacer, Image
 from reportlab.lib.styles import ParagraphStyle, StyleSheet1
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.fonts import addMapping
@@ -39,12 +42,25 @@ def ExistingFile(p):
 
 # Returns the best orientation for the given image aspect ration
 def best_orientation(image_path, card_width, card_height):
-    image = Image.open(image_path)
+    image = PIL.Image.open(image_path)
     image_width, image_height = image.size
     if (image_width > image_height) == (card_width > card_height):
         return Orientation.NORMAL
     else:
         return Orientation.TURN90
+
+
+# Returns the width and height an image should be to fit into the available
+# space, while maintaining aspect ratio
+def get_image_size(path, available_width, available_height):
+    img = utils.ImageReader(path)
+    image_width, image_height = img.getSize()
+
+    width_ratio = available_width / image_width
+    height_ratio = available_height / image_height
+    best_ratio = min(width_ratio, height_ratio)
+
+    return (image_width * best_ratio, image_height * best_ratio)
 
 
 # TODO: Clean up the font object, it seems a bit crude
@@ -58,6 +74,29 @@ class Fonts(ABC):
     def __init__(self):
         self._register_fonts()
         self.paragraph_styles = StyleSheet1()
+        self.paragraph_styles.add(
+            ParagraphStyle(
+                name="title",
+                fontName=self.styles["title"][0],
+                fontSize=self.styles["title"][1] * self.FONT_SCALE,
+                leading=self.styles["title"][1] * self.FONT_SCALE + 0.5 * mm,
+                spaceAfter=0.5 * mm,
+                alignment=TA_CENTER,
+                textTransform="uppercase",
+            )
+        )
+        self.paragraph_styles.add(
+            ParagraphStyle(
+                name="subtitle",
+                fontName=self.styles["subtitle"][0],
+                fontSize=self.styles["subtitle"][1] * self.FONT_SCALE,
+                textColor=self.styles["subtitle"][2],
+                backColor="red",
+                leading=self.styles["subtitle"][1] * self.FONT_SCALE + 0.5 * mm,
+                alignment=TA_CENTER,
+                borderPadding=(0, 6),
+            )
+        )
         self.paragraph_styles.add(
             ParagraphStyle(
                 name="text",
@@ -122,9 +161,11 @@ class FreeFonts(Fonts):
         "title": ("Universal Serif", 2.5 * mm, "black"),
         "subtitle": ("ScalySans", 1.5 * mm, "white"),
         "challenge": ("Universal Serif", 2.25 * mm, "black"),
+        "category": ("Universal Serif", 2.25 * mm, "black"),
+        "subcategory": ("Universal Serif", 1.5 * mm, "black"),
         "heading": ("ScalySansBold", 1.5 * mm, "black"),
         "text": ("ScalySans", 1.5 * mm, "black"),
-        "artist": ("ScalySans", 1.25 * mm, "white"),
+        "artist": ("ScalySans", 1.5 * mm, "white"),
         "modifier_title": ("Universal Serif", 1.5 * mm, "black"),
     }
 
@@ -156,6 +197,8 @@ class AccurateFonts(Fonts):
         "title": ("ModestoExpanded", 2.5 * mm, "black"),
         "subtitle": ("ModestoTextLight", 1.5 * mm, "white"),
         "challenge": ("ModestoExpanded", 2.25 * mm, "black"),
+        "category": ("ModestoExpanded", 2.25 * mm, "black"),
+        "subcategory": ("ModestoExpanded", 1.5 * mm, "black"),
         "heading": ("ModestoTextBold", 1.5 * mm, "black"),
         "text": ("ModestoTextLight", 1.5 * mm, "black"),
         "artist": ("ModestoTextLight", 1.25 * mm, "white"),
@@ -339,6 +382,73 @@ class CardLayout(ABC):
     def fill_frames(self, canvas):
         pass
 
+    def _draw_front_frame(self, canvas, width, height):
+        front_frame = Frame(
+            self.border_front[Border.LEFT],
+            self.border_front[Border.BOTTOM],
+            width - self.border_front[Border.LEFT] - self.border_front[Border.RIGHT],
+            height - self.border_front[Border.TOP] - self.border_front[Border.BOTTOM],
+            leftPadding=self.TEXT_MARGIN,
+            bottomPadding=self.TEXT_MARGIN,
+            rightPadding=self.TEXT_MARGIN,
+            topPadding=self.TEXT_MARGIN,
+        )
+
+        # DEBUG
+        # front_frame.drawBoundary(canvas)
+
+        title_paragraph = self._get_title_paragraph()
+
+        # Nasty hack alert!
+        # There is no way to know how big the text will be and Frame only
+        # supports top to bottom layout. This means we have no way of
+        # knowing the maximum image size.
+        #
+        # As a hack to get around this, we have to:
+        #  1. mock out the paragraphs drawOn method
+        #  2. "draw" the paragraph
+        #  3. Calculate how tall it was
+        #  4. Reset the frame and restore the original drawOn
+
+        def mock(*args, **kwargs):
+            pass
+
+        original_drawOn = title_paragraph.drawOn
+        title_paragraph.drawOn = mock
+        result = front_frame.add(title_paragraph, canvas)
+        if not result:
+            raise Exception("Failed to draw title in front frame")
+
+        title_height = (
+            front_frame.y1 + front_frame.height - front_frame._y + self.TEXT_MARGIN
+        )
+        title_paragraph.drawOn = original_drawOn
+        front_frame._reset()
+
+        available_height = front_frame.height - title_height - self.TEXT_MARGIN * 2
+
+        image_width, image_height = get_image_size(
+            self.front_image_path,
+            front_frame.width,
+            available_height,
+        )
+
+        elements = []
+
+        # Add spacer if image doesn't fully fill frame
+        space = front_frame.height - (image_height + title_height)
+        if space > 0:
+            elements.append(Spacer(front_frame.width, space / 2))
+
+        elements.append(Image(self.front_image_path, image_width, image_height))
+
+        # Add second spacer
+        if space > 0:
+            elements.append(Spacer(front_frame.width, space / 2))
+
+        elements.append(title_paragraph)
+        front_frame.addFromList(elements, canvas)
+
     def _draw_frames(self, canvas, split=False):
         frames = iter(self.frames)
         current_frame = next(frames)
@@ -435,15 +545,7 @@ class CardLayout(ABC):
                 height - self.border_front[Border.TOP] + logo_margin,
             )
 
-        # Titles
-        custom_scale = (
-            min(1.0, 20 / len(self.title)) if isinstance(self, SmallCard) else 1.0
-        )
-        canvas.setFillColor("black")
-        title_height = self.fonts.set_font(canvas, "title", custom_scale)
-        canvas.drawCentredString(
-            width * 0.5, self.front_margins[Border.BOTTOM], self.title.upper()
-        )
+        self._draw_front_frame(canvas, width, height)
 
         # Artist
         if self.artist:
@@ -455,20 +557,6 @@ class CardLayout(ABC):
                 "Artist: {}".format(self.artist),
             )
 
-        # Image
-        image_bottom = self.front_margins[Border.BOTTOM] + title_height + 1 * mm
-        canvas.drawImage(
-            self.front_image_path,
-            self.front_margins[Border.LEFT],
-            image_bottom,
-            width=width
-            - self.front_margins[Border.LEFT]
-            - self.front_margins[Border.RIGHT],
-            height=height - image_bottom - self.front_margins[Border.TOP],
-            preserveAspectRatio=True,
-            mask="auto",
-        )
-
         canvas.restoreState()
 
     def _draw_back(self, canvas):
@@ -479,36 +567,6 @@ class CardLayout(ABC):
         self._draw_single_background(
             canvas, self.width, self.border_back, self.width, self.height
         )
-
-        # Title
-        custom_scale = min(1.0, 20 / len(self.title))
-        canvas.setFillColor("black")
-        title_font_height = self.fonts.set_font(canvas, "title", custom_scale)
-        title_line_bottom = self.frames[0]._y2 + self.STANDARD_BORDER
-        title_bottom = (
-            title_line_bottom + (self.TITLE_BAR_HEIGHT - title_font_height) / 2
-        )
-        title_center = (self.frames[0]._x1 + self.frames[0]._x2) / 2
-        canvas.drawCentredString(title_center, title_bottom, self.title.upper().strip())
-
-        # Subtitle
-        subtitle_line_bottom = title_line_bottom - self.STANDARD_BORDER
-        canvas.setFillColor(self.border_color)
-        canvas.rect(
-            self.frames[0]._x1,
-            self.frames[0]._y2,
-            self.frames[0]._width,
-            self.STANDARD_BORDER,
-            stroke=0,
-            fill=1,
-        )
-
-        canvas.setFillColor("white")
-        subtitle_font_height = self.fonts.set_font(canvas, "subtitle")
-        subtitle_bottom = (
-            subtitle_line_bottom + (self.STANDARD_BORDER - subtitle_font_height) / 2
-        )
-        canvas.drawCentredString(title_center, subtitle_bottom, self.subtitle)
 
     def _draw_single_border(self, canvas, x, width, height):
         canvas.saveState()
@@ -564,7 +622,7 @@ class SmallCard(CardLayout):
         width=CardLayout.BASE_WIDTH,
         height=CardLayout.BASE_HEIGHT,
         border_front=(2.5 * mm, 2.5 * mm, 7.0 * mm, 7.0 * mm),
-        border_back=(2.5 * mm, 2.5 * mm, 9.2 * mm, 1.7 * mm),
+        border_back=(2.5 * mm, 2.5 * mm, 9.2 * mm, 2.5 * mm),
         **kwargs,
     ):
         super().__init__(
@@ -576,19 +634,21 @@ class SmallCard(CardLayout):
         )
 
         frame = Frame(
+            # X
             self.width + self.border_back[Border.LEFT],
+            # Y
             self.border_back[Border.BOTTOM],
+            # Width
             self.width - self.border_back[Border.LEFT] - self.border_back[Border.RIGHT],
+            # Height
             self.height
             - self.border_back[Border.TOP]
-            - self.TITLE_BAR_HEIGHT
-            - self.STANDARD_BORDER
             - self.border_back[Border.BOTTOM],
+            # Padding
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
-            topPadding=1 * mm,
-            showBoundary=True,
+            topPadding=0,
         )
         self.frames.append(frame)
 
@@ -611,26 +671,34 @@ class LargeCard(CardLayout):
         )
 
         left_frame = Frame(
+            # X
             self.width + self.border_back[Border.LEFT],
+            # Y
             self.border_back[Border.BOTTOM],
+            # Width
             self.width / 2 - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            # Height
             self.height
             - self.border_back[Border.TOP]
-            - self.TITLE_BAR_HEIGHT
-            - self.STANDARD_BORDER
             - self.border_back[Border.BOTTOM],
+            # Padding
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
-            topPadding=1 * mm,
+            topPadding=0,
         )
         right_frame = Frame(
+            # X
             self.width * 1.5 + self.STANDARD_BORDER / 2,
+            # Y
             self.border_back[Border.BOTTOM],
+            # Width
             self.width / 2 - self.border_back[Border.LEFT] - self.STANDARD_BORDER / 2,
+            # Height
             self.height
             - self.border_back[Border.BOTTOM]
             - self.border_back[Border.TOP],
+            # Padding
             leftPadding=self.TEXT_MARGIN,
             bottomPadding=self.TEXT_MARGIN,
             rightPadding=self.TEXT_MARGIN,
@@ -720,6 +788,7 @@ class MonsterCardLayout(CardLayout):
         super()._draw_back(canvas)
 
         # Challenge
+        canvas.setFillColor("white")
         self.fonts.set_font(canvas, "challenge")
         canvas.drawString(
             self.width + self.border_front[Border.LEFT],
@@ -733,6 +802,35 @@ class MonsterCardLayout(CardLayout):
         canvas.drawString(*self.source_location, self.source)
 
     def fill_frames(self, canvas):
+
+        # Title font scaling
+        custom_scale = (
+            min(1.0, 20 / len(self.title)) if isinstance(self, SmallCard) else 1.0
+        )
+        original_font_size = self.fonts.styles["title"][1] * self.fonts.FONT_SCALE
+        font_size = original_font_size * custom_scale
+        spacer_height = (original_font_size - font_size + 0.5 * mm) / 2
+        style = copy(self.fonts.paragraph_styles["title"])
+        style.fontSize = font_size
+        style.leading = font_size + spacer_height
+
+        # Title
+        self.elements.append(Spacer(1 * mm, spacer_height))
+        self.elements.append(
+            Paragraph(
+                self.title,
+                style,
+            )
+        )
+
+        # Subtitle
+        self.elements.append(
+            Paragraph(
+                self.subtitle,
+                self.fonts.paragraph_styles["subtitle"],
+            )
+        )
+
         top_stats = [
             [
                 Paragraph(
@@ -899,6 +997,115 @@ class MonsterCardLayout(CardLayout):
                     element = paragraph
                 self.elements.append(element)
 
+    def _get_title_paragraph(self):
+        # Title font scaling
+        custom_scale = (
+            min(1.0, 20 / len(self.title)) if isinstance(self, SmallCard) else 1.0
+        )
+        original_font_size = self.fonts.styles["title"][1] * self.fonts.FONT_SCALE
+        font_size = original_font_size * custom_scale
+        style = copy(self.fonts.paragraph_styles["title"])
+        style.fontSize = font_size
+        style.leading = font_size
+
+        # Title
+        return Paragraph(
+            self.title,
+            style,
+        )
+
+
+class ItemCardLayout(CardLayout):
+    def __init__(
+        self,
+        title,
+        subtitle,
+        artist,
+        image_path,
+        category,
+        subcategory,
+        description,
+        **kwargs,
+    ):
+        super().__init__(title, subtitle, artist, image_path, **kwargs)
+        self.category = category
+        self.subcategory = subcategory
+        self.description = description
+
+    def _draw_back(self, canvas):
+        super()._draw_back(canvas)
+
+        canvas.setFillColor("white")
+        self.fonts.set_font(canvas, "category")
+        left_of_category_text = self.width + self.border_front[Border.LEFT]
+        width_of_category_text = canvas.stringWidth(self.category)
+        canvas.drawString(
+            left_of_category_text,
+            self.category_bottom,
+            self.category,
+        )
+
+        if self.subcategory is not None:
+            self.fonts.set_font(canvas, "subcategory")
+            canvas.drawString(
+                left_of_category_text + width_of_category_text + 1 * mm,
+                self.category_bottom,
+                "({})".format(self.subcategory),
+            )
+
+    def fill_frames(self, canvas):
+
+        # Title
+        self.elements.append(self._get_title_paragraph())
+
+        # Subtitle
+        self.elements.append(
+            Paragraph(
+                self.subtitle,
+                self.fonts.paragraph_styles["subtitle"],
+            )
+        )
+
+        # Add a space before text
+        self.elements.append(Spacer(1 * mm, 1 * mm))
+
+        if type(self.description) == str:
+            self.elements.append(
+                Paragraph(self.description, self.fonts.paragraph_styles["text"])
+            )
+            return
+        if type(self.description) != list:
+            raise ValueError(
+                f"Item `{self.title}` description should be a `str` or `list`"
+            )
+
+        for entry in self.description:
+            if type(entry) == str:
+                self.elements.append(
+                    Paragraph(entry, self.fonts.paragraph_styles["text"])
+                )
+            if type(entry) == dict:
+                for title, description in entry.items():
+
+                    text = f"<i><b>{title}.</b></i>"
+                    if description is not None:
+                        text += f" {description}"
+
+                    self.elements.append(
+                        Paragraph(
+                            text,
+                            self.fonts.paragraph_styles["text"],
+                        )
+                    )
+
+            # TODO: Tables
+
+    def _get_title_paragraph(self):
+        return Paragraph(
+            self.title,
+            self.fonts.paragraph_styles["title"],
+        )
+
 
 class MonsterCardSmall(SmallCard, MonsterCardLayout):
     def __init__(self, *args, **kwargs):
@@ -908,6 +1115,13 @@ class MonsterCardSmall(SmallCard, MonsterCardLayout):
             self.width + self.border_back[Border.LEFT],
             3 * mm + self.bleed,
         )
+
+
+class ItemCardSmall(SmallCard, ItemCardLayout):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # category is centered in the footer
+        self.category_bottom = 3.5 * mm + self.bleed
 
 
 class MonsterCardLarge(LargeCard, MonsterCardLayout):
@@ -959,6 +1173,10 @@ class MonsterCard(CardGenerator):
     sizes = [MonsterCardSmall, MonsterCardLarge, MonsterCardEpic, MonsterCardSuperEpic]
 
 
+class ItemCard(CardGenerator):
+    sizes = [ItemCardSmall]  # maybe more in the future
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Generate D&D cards.")
@@ -968,7 +1186,7 @@ if __name__ == "__main__":
         help="What type of cards to generate",
         action="store",
         default="monster",
-        choices=["monster"],
+        choices=["monster", "item"],
         dest="type",
     )
     parser.add_argument(
@@ -1044,27 +1262,24 @@ if __name__ == "__main__":
             exit()
 
     for entry in entries:
-        if args.type == "monster":
-
-            image_path = None
-            if "image_path" in entry:
-                image_path = pathlib.Path(entry["image_path"])
-                if not image_path.is_absolute():
-                    image_path = (args.input.parent / image_path).absolute()
-                if not image_path.exists():
-                    raise ValueError(
-                        "Invalid `image_path` in `{}`: {}".format(
-                            entry["title"], entry["image_path"]
-                        )
+        image_path = None
+        if "image_path" in entry:
+            image_path = pathlib.Path(entry["image_path"])
+            if not image_path.is_absolute():
+                image_path = (args.input.parent / image_path).absolute()
+            if not image_path.exists():
+                raise ValueError(
+                    "Invalid `image_path` in `{}`: {}".format(
+                        entry["title"], entry["image_path"]
                     )
-            else:
-                image_path = ASSET_DIR / "placeholder.png"
+                )
 
+        if args.type == "monster":
             card = MonsterCard(
                 title=entry["title"],
                 subtitle=entry["subtitle"],
                 artist=entry.get("artist", None),
-                image_path=image_path,
+                image_path=image_path or ASSET_DIR / "placeholder_monster.png",
                 background=args.background,
                 armor_class=entry["armor_class"],
                 max_hit_points=entry["max_hit_points"],
@@ -1083,6 +1298,20 @@ if __name__ == "__main__":
                 actions=entry.get("actions", None),
                 reactions=entry.get("reactions", None),
                 legendary=entry.get("legendary", None),
+                fonts=fonts,
+                border_color=entry.get("color", "red"),
+                bleed=args.bleed,
+            )
+        elif args.type == "item":
+            card = ItemCard(
+                title=entry["title"],
+                subtitle=entry["subtitle"],
+                artist=entry.get("artist", None),
+                image_path=image_path or ASSET_DIR / "placeholder_item.png",
+                background=args.background,
+                description=entry["description"],
+                category=entry["category"],
+                subcategory=entry.get("subcategory", None),
                 fonts=fonts,
                 border_color=entry.get("color", "red"),
                 bleed=args.bleed,

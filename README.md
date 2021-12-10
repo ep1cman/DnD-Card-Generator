@@ -19,9 +19,7 @@ Before being able to use this script you will need to do the following:
 
 # Usage
 ```
-usage: CardGenerator.py [-h] [-t {monster}] [-o output_path]
-                        [-f {free,accurate}]
-                        input
+sage: CardGenerator.py [-h] [-t {monster,item}] [-o output_path] [-f {free,accurate}] [-b BLEED] [--no-bg | --bg BACKGROUND] input
 
 Generate D&D cards.
 
@@ -30,18 +28,18 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t {monster}, --type {monster}
+  -t {monster,item}, --type {monster,item}
                         What type of cards to generate
   -o output_path, --out output_path
                         Output file path
   -f {free,accurate}, --fonts {free,accurate}
                         What fonts to use when generating cards
-  -b radius, --bleed radius
-                        How many millimeters to extend the card border.
+  -b BLEED, --bleed BLEED
+                        How many millimeters of print bleed radius to add around each card.
   --no-bg               Do not add the 'parchment' effect background.
   --bg BACKGROUND       Custom background image to use
 ```
-Included in the `example` directory is an example YAML file that generates a `Goblin` card.
+Included in the `example` directory are example YAML files.
 
 # Input YAML
 The input to this script is a YAML file that details all the attributes of the card. The details of what to include for each card type can be found below.
@@ -57,7 +55,7 @@ You can add formatting to any of the fields that generate text using reportlab's
 ## Monster Cards
 ![Example Monster Card](docs/monster.png)
 
-Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds the space available on a small card, it will automatically scale to a double width card, like the official ones. I am planning on adding a third card layout to accommodate monsters with a lot of text, which GF9 didn't include. The front of the card is automatically oriented to best fit the aspect ratio of the image provided.
+Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds the space available on a small card, it will automatically scale to a double width card, like the official ones. The front of the card is automatically oriented to best fit the aspect ratio of the image provided.
 
 ## YAML Entry fields
 - **title** - The title of the card that will appear at the bottom of the front of the card, and at the top of the back of the card
@@ -68,7 +66,7 @@ Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds 
 - **max_hit_points** - The max hit points of the monster (top right of the card), can include any text e.g. ``7 (2d6)``
 - **speed** - The speed of the monster (below armor_class), can include any text e.g. ``30ft., fly 60 ft.``
 - **strength, dexterity, constitution, intelligence, wisdom, charisma** - Ability modifiers show at the top of the card. They can also include ability scores e.g. `-1` or `8 (-1)`
-- **challenge_rating** - The challenge rating of the monster, white text show at the bottom of the back of the card
+- **challenge_rating** - The challenge rating of the monster, white text shown at the bottom of the back of the card
 - **experience_points** - The experience points earned for defeating the monster, shown next to the challenge rating
 - **source** - The source from which this cards information came from. e.g. ``"System Reference Document: Page 315"``
 - **attributes** - A dictionary of the monsters "attributes", these appear in the top half of the second section of the card. Some common attributes include: `Skills`, `Senses`, `Languages`, `Damage Immunities`. The key will be typeset in **bold** while the value will be typeset as regular text.
@@ -110,6 +108,38 @@ Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds 
     the end of another creature's turn. The goblin regains spent legendary actions at the start
     of its turn.<br/>
     - Poison Gas: The goblin is able to "naturally" produce a noxious poison gas cloud, that causes 1 (1d4) of poison damage
+```
+
+## Item Cards
+![Example Item Card](docs/item.png)
+
+Based on the Gale Force Nine Monster Cards. Currently only the standard small size card is available. The front of the card is automatically oriented to best fit the aspect ratio of the image provided.
+
+## YAML Entry fields
+- **title** - The title of the card that will appear at the bottom of the front of the card, and at the top of the back of the card
+- **subtitle** - The white text that appears below the title on the back of the card
+- **artist** - If this is provided, and not blank, white text below the title on the front of the card will show the artist of the cards artwork.
+- **image_path** - Path to the image to insert on the front of the card. This can either be a full path, or relative to the location of the YAML file.
+- **category** - The item category, white text shown at the bottom of the back of the card
+- **subcategory** - The item subcategory, smaller white text shown next to the category in parenthesis
+- **description** - A list containing either: 
+    - Strings
+    - Single entry dictionaries with the value being optional
+- **color** - A color name (e.g. `red`), hex color code (e.g. `#0000dd`) or array of RGB colors (e.g. `[0.7, 0.7, 0]`).
+
+### Example
+``` YAML
+- title: Badge of having a very very very very long name
+  subtitle: Rare (requires attunement, and a really really really really long backstory for your name)
+  image_path: badge.png
+  artist: Public Domain
+  description: 
+    - Wearing this amulet will add a minimum of 10d8 syllables to your name. This effect is permanent, even once the amulet is removed. The effect stacks every time this amulet is worn.
+    - Proud: You become unreasonably proud of your name, and insist that anyone who addresses you uses your full name.
+    - Verbal incapacitation: "As an action you can force any creature with an intelligence score of 1 or higher to spend time pronouncing your name. While they are doing this they are completely preoccupied and take on the Incapacitated condition. Each round the targeted creature can make an Intelligence saving throw (DC 18). On a successful save, the creature correctly pronounces your name, and the Incapacitated condition is removed."
+    - Sticky:
+  category: Woundrous item
+  subcategory: Badge
 ```
 
 # Fonts
