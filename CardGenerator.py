@@ -805,7 +805,7 @@ class MonsterCardLayout(CardLayout):
 
         # Title font scaling
         custom_scale = (
-            min(1.0, 22 / len(self.title)) if isinstance(self, SmallCard) else 1.0
+            min(1.0, 20 / len(self.title)) if isinstance(self, SmallCard) else 1.0
         )
         original_font_size = self.fonts.styles["title"][1] * self.fonts.FONT_SCALE
         font_size = original_font_size * custom_scale
@@ -1000,7 +1000,7 @@ class MonsterCardLayout(CardLayout):
     def _get_title_paragraph(self):
         # Title font scaling
         custom_scale = (
-            min(1.0, 22 / len(self.title)) if isinstance(self, SmallCard) else 1.0
+            min(1.0, 20 / len(self.title)) if isinstance(self, SmallCard) else 1.0
         )
         original_font_size = self.fonts.styles["title"][1] * self.fonts.FONT_SCALE
         font_size = original_font_size * custom_scale
