@@ -1,0 +1,10 @@
+- title: Badge of having a very very very very long name
+  subtitle: Rare (requires attunement, and a really really really really long backstory for your name)
+  image_path: badge.png
+  description: 
+    - Wearing this amulet will add a minimum of 10d8 syllables to your name. This effect is permanent, even once the amulet is removed. The effect stacks every time this amulet is worn.
+    - Proud: You become unreasonably proud of your name, and insist that anyone who addresses you uses your full name.
+    - Verbal incapacitation: "As an action you can force any creature with an intelligence score of 1 or higher to spend time pronouncing your name. While they are doing this they are completely preoccupied and take on the Incapacitated condition. Each round the targeted creature can make an Intelligence saving throw (DC 18). On a successful save, the creature correctly pronounces your name, and the Incapacitated condition is removed."
+  category: Woundrous item
+  subcategory: Badge
+
