@@ -19,7 +19,7 @@ Before being able to use this script you will need to do the following:
 
 # Usage
 ```
-sage: CardGenerator.py [-h] [-t {monster,item}] [-o output_path] [-f {free,accurate}] [-b BLEED] [--no-bg | --bg BACKGROUND] input
+usage: CardGenerator.py [-h] [-t {monster,item}] [-o output_path] [-f {free,accurate}] [-b BLEED] [--no-bg | --bg BACKGROUND] input
 
 Generate D&D cards.
 
@@ -104,9 +104,9 @@ Based on the Gale Force Nine Monster Cards. If the contents of the card exceeds 
     Shortbow: +4, range 80/320 ft., 5 (1d6 + 2) piercing damage.
   legendary:
     - This is a special goblin, who for the the sake of this example can take 3 legendary actions,
-    choosing from the options below. Only one legendary action can be used at a time and only at
-    the end of another creature's turn. The goblin regains spent legendary actions at the start
-    of its turn.<br/>
+      choosing from the options below. Only one legendary action can be used at a time and only at
+      the end of another creature's turn. The goblin regains spent legendary actions at the start
+      of its turn.<br/>
     - Poison Gas: The goblin is able to "naturally" produce a noxious poison gas cloud, that causes 1 (1d4) of poison damage
 ```
 
