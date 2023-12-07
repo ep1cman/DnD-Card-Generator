@@ -1,7 +1,7 @@
 # Dungeons & Dragons Card Generator
 A script to generate cards for Dungeons and Dragons in the style of the official Gale Force Nine ones.
 
-At this time, only monster cards are supported
+At this time, only monster & item cards are supported
 
 <meta property="og:image"
     content="https://raw.githubusercontent.com/ep1cman/DnD-Card-Generator/master/docs/monster.png" />
