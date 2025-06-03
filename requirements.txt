@@ -2,3 +2,4 @@ pyyaml
 reportlab
 svglib
 beautifulsoup4
+PyPDF2
